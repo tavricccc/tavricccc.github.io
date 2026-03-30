@@ -10,34 +10,39 @@ const nowText =
 	title="About Me - Dan Arnoux (符笙)"
 	description="Learn more about DanArnoux (符笙), an energy engineering student from China passionate about practical engineering, clear reasoning, and building reproducible systems."
 	pubDate={new Date('Feb 10 2026')}
+	metaMode="page"
 	heroImage="https://img.danarnoux.com/misc/about-image.webp"
 	profileImage="https://img.danarnoux.com/misc/DanArnoux.webp"
 >
-	<p>
-		I am DanArnoux (符笙), an energy engineering student from China. I care about practical
-		engineering, clear reasoning, and building systems that can be explained and reproduced.
-		This blog is my long-term notebook for experiments, tools, and technical decisions.
-	</p>
+	<div class="mx-auto max-w-3xl">
+		<p>
+			I am DanArnoux (符笙), an energy engineering student from China. I care about practical
+			engineering, clear reasoning, and building systems that can be explained and reproduced.
+			This blog is my long-term notebook for experiments, tools, and technical decisions.
+		</p>
 
-	<h2>Focus</h2>
-	<ul>
-		<li>Electrochemistry and materials aging: CV / EIS / ECSA analysis, battery degradation, and characterization</li>
-		<li>Simulation and modeling: battery-oriented FEM studies, Simulink models, and reproducible workflows</li>
-		<li>
-			AI and applied systems: Stable Diffusion, LLM-assisted tooling, and
-			<a href="https://creatinf.com/" target="_blank" rel="noreferrer">CreatInf</a>
-		</li>
-	</ul>
+		<h2>Focus</h2>
+		<ul>
+			<li>Electrochemistry and materials aging: CV / EIS / ECSA analysis, battery degradation, and characterization</li>
+			<li>Simulation and modeling: battery-oriented FEM studies, Simulink models, and reproducible workflows</li>
+			<li>
+				AI and applied systems: Stable Diffusion, LLM-assisted tooling, and
+				<a href="https://creatinf.com/" target="_blank" rel="noreferrer">CreatInf</a>
+			</li>
+		</ul>
 
-	<h2>Now</h2>
-	<TerminalQuote text={nowText} once={true} fixedHeight={false} />
+		<h2>Now</h2>
+		<div class="mx-auto max-w-2xl text-left">
+			<TerminalQuote text={nowText} once={true} fixedHeight={false} />
+		</div>
 
-	<h2>Contact</h2>
-	<p>
-		The most reliable way to reach me is by email:
-		<code></code>
-		or
-		<code></code>.
-		You can also find me via GitHub and Bilibili from the site navigation.
-	</p>
+		<h2>Contact</h2>
+		<p>
+			The most reliable way to reach me is by email:
+			<code></code>
+			or
+			<code></code>.
+			You can also find me via GitHub and Bilibili from the site navigation.
+		</p>
+	</div>
 </Layout>
