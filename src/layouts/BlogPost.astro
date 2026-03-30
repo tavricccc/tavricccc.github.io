@@ -16,6 +16,7 @@ type Props = CollectionEntry<'blog'>['data'] & {
 	headings?: { depth: number; slug: string; text: string }[];
 	rawBody?: string;
 	slug?: string;
+	analyticsKey?: string;
 	languageSwitch?: {
 		href: string;
 		label: string;
@@ -35,6 +36,7 @@ const {
 	headings = [],
 	rawBody = '',
 	slug,
+	analyticsKey = slug,
 	languageSwitch,
 	relatedPosts = [],
 	relatedPostsLang = 'en',
@@ -102,6 +104,14 @@ const charsLabel = chars.toLocaleString('en-US');
 						<header class="mb-10 min-w-0 border-b border-zinc-200 pb-6 dark:border-zinc-700">
 							<p class="m-0 text-sm text-zinc-500 dark:text-zinc-400">
 								<FormattedDate date={pubDate} />
+								<span class="mx-1.5">&middot;</span>
+								<span class="inline-flex items-center gap-1 align-middle" data-post-views-root={analyticsKey ?? ''}>
+									<svg viewBox="0 0 24 24" class="h-3.5 w-3.5 opacity-70" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+										<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z" stroke-linecap="round" stroke-linejoin="round" />
+										<circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round" />
+									</svg>
+									<span data-post-views>...</span>
+								</span>
 								<span class="mx-1.5">&middot;</span>
 								<span>{charsLabel} chars</span>
 								<span class="mx-1.5">&middot;</span>
@@ -666,6 +676,70 @@ const charsLabel = chars.toLocaleString('en-US');
 				initTocActiveState();
 				initTocScrollFades();
 				initImageLightbox();
+				loadPostViews();
+			};
+
+			const formatViewCount = (count) => {
+				const value = Number(count);
+				if (!Number.isFinite(value) || value < 0) return '0 views';
+				return `${value.toLocaleString('en-US')} ${value === 1 ? 'view' : 'views'}`;
+			};
+
+			const loadPostViews = async () => {
+				const root = document.querySelector('[data-post-views-root]');
+				const output = document.querySelector('[data-post-views]');
+				if (!(root instanceof HTMLElement) || !(output instanceof HTMLElement)) return;
+
+				const slug = root.dataset.postViewsRoot || '';
+				if (!slug) {
+					output.textContent = '0 views';
+					return;
+				}
+
+				if (window.__activePostViewsSlug === slug) return;
+				window.__activePostViewsSlug = slug;
+
+				const apiBase = window.__API_BASE || 'https://api.danarnoux.com';
+				const sessionKey = `blog_viewed:${slug}`;
+				const hasViewedInSession = (() => {
+					try {
+						return sessionStorage.getItem(sessionKey) === '1';
+					} catch {
+						return false;
+					}
+				})();
+
+				try {
+					const response = hasViewedInSession
+						? await fetch(`${apiBase}/api/views?post=${encodeURIComponent(slug)}`)
+						: await fetch(`${apiBase}/api/views`, {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+								},
+								body: JSON.stringify({ post: slug }),
+							});
+
+					if (response.ok) {
+						const data = await response.json();
+						if (!hasViewedInSession) {
+							try {
+								sessionStorage.setItem(sessionKey, '1');
+							} catch {}
+						}
+						output.textContent = formatViewCount(data?.views ?? 0);
+						return;
+					}
+				} catch {}
+
+				try {
+					const fallback = await fetch(`${apiBase}/api/views?post=${encodeURIComponent(slug)}`);
+					if (!fallback.ok) throw new Error('views_get_failed');
+					const data = await fallback.json();
+					output.textContent = formatViewCount(data?.views ?? 0);
+				} catch {
+					output.textContent = '0 views';
+				}
 			};
 
 			onPostPageLoad();

@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import FormattedDate from './FormattedDate.astro';
 import TagBadges from './TagBadges.astro';
+import { getPostAnalyticsKey } from '../utils/postAnalytics';
 
 /*
  * Reusable post preview card used across all list surfaces.
@@ -35,6 +36,7 @@ const {
 } = Astro.props as Props;
 
 const tags = (post.data.tags ?? []).filter((tag) => tag.trim().length > 0);
+const analyticsKey = getPostAnalyticsKey(post);
 const Heading = titleTag;
 ---
 
@@ -53,10 +55,66 @@ const Heading = titleTag;
 		data-astro-reload={reloadOnNavigate ? '' : undefined}
 		class:list={['block h-full p-5 no-underline', tags.length > 0 && 'pt-3 md:pt-5']}
 	>
-		<p class="m-0 text-xs text-zinc-500 dark:text-zinc-400">
+		<p class="m-0 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
 			<FormattedDate date={post.data.pubDate} />
+			<span aria-hidden="true">&middot;</span>
+			<span class="inline-flex items-center gap-1" data-post-card-views-root={analyticsKey}>
+				<svg viewBox="0 0 24 24" class="h-3.5 w-3.5 opacity-70" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+					<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z" stroke-linecap="round" stroke-linejoin="round" />
+					<circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+				<span data-post-card-views>...</span>
+			</span>
 		</p>
 		<Heading class:list={[titleClass, tags.length > 0 && 'md:pr-24 lg:pr-28']}>{post.data.title}</Heading>
 		<p class={descriptionClass}>{post.data.description}</p>
 	</a>
 </div>
+
+<script is:inline>
+	(() => {
+		const formatViewCount = (count) => {
+			const value = Number(count);
+			if (!Number.isFinite(value) || value < 0) return '0';
+			if (value >= 1000) return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1).replace(/\.0$/, '')}k`;
+			return value.toLocaleString('en-US');
+		};
+
+		const loadPostCardViews = async () => {
+			const roots = Array.from(document.querySelectorAll('[data-post-card-views-root]'));
+			if (!roots.length) return;
+
+			const apiBase = window.__API_BASE || 'https://api.danarnoux.com';
+			const uniqueKeys = [...new Set(
+				roots
+					.map((root) => root.getAttribute('data-post-card-views-root') || '')
+					.filter(Boolean)
+			)];
+
+			await Promise.all(uniqueKeys.map(async (key) => {
+				let text = '0';
+				try {
+					const response = await fetch(`${apiBase}/api/views?post=${encodeURIComponent(key)}`);
+					if (response.ok) {
+						const data = await response.json();
+						text = formatViewCount(data?.views ?? 0);
+					}
+				} catch {}
+
+				document
+					.querySelectorAll(`[data-post-card-views-root="${key}"] [data-post-card-views]`)
+					.forEach((node) => {
+						node.textContent = text;
+					});
+			}));
+		};
+
+		if (!window.__postCardViewsBound) {
+			document.addEventListener('astro:page-load', loadPostCardViews);
+			document.addEventListener('astro:after-swap', loadPostCardViews);
+			window.__postCardViewsBound = true;
+		}
+
+		loadPostCardViews();
+	})();
+</script>
