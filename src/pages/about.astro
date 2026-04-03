@@ -38,11 +38,18 @@ const nowText =
 
 		<h2>Contact</h2>
 		<p>
-			The most reliable way to reach me is by email:
-			<code></code>
-			or
-			<code></code>.
-			You can also find me via GitHub and Bilibili from the site navigation.
+			The best way to reach me is via the
+			<button type="button" class="contact-link" data-modal-toggle="contact">contact form</button>
+			on this site. You can also find me via GitHub and Bilibili from the site navigation.
 		</p>
 	</div>
 </Layout>
+
+<script>
+	document.querySelectorAll('.contact-link').forEach(btn => {
+		btn.addEventListener('click', () => {
+			const event = new CustomEvent('open-contact-modal');
+			window.dispatchEvent(event);
+		});
+	});
+</script>
