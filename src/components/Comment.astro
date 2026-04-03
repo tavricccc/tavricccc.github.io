@@ -53,6 +53,9 @@ const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 </section>
 
 <script>
+	const isDev = import.meta.env.DEV;
+	const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
+
 	const { storeTokenFromHash, getAuthToken, getCurrentUser } = window.__auth || {};
 
 	// Format relative time
