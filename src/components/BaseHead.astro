@@ -282,7 +282,7 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 
 		const animateCursor = () => {
 			const el = ensureCursor();
-			const easing = currentState === 'text' ? 0.28 : currentState === 'clickable' ? 0.2 : 0.16;
+			const easing = currentState === 'text' ? 0.5 : currentState === 'clickable' ? 0.4 : 0.3;
 			currentX += (targetX - currentX) * easing;
 			currentY += (targetY - currentY) * easing;
 			el.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;

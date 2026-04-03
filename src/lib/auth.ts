@@ -200,3 +200,45 @@ export async function updateProfileAvatar(avatarUrl: string): Promise<{ ok: bool
 		return { ok: false, error: 'Network error' };
 	}
 }
+
+export async function updateProfileUsername(username: string): Promise<{ ok: boolean; user?: User; error?: string }> {
+	const token = getToken();
+	if (!token) {
+		return { ok: false, error: 'Not logged in' };
+	}
+
+	try {
+		const response = await fetch(`${API_BASE}/api/me`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify({ username }),
+		});
+
+		const data = await response.json();
+		if (!response.ok) {
+			return { ok: false, error: data.error ?? 'Failed to update username' };
+		}
+
+		const user = data?.user ?? null;
+		if (!user || typeof user !== 'object') {
+			return { ok: false, error: 'Invalid user response' };
+		}
+
+		return {
+			ok: true,
+			user: {
+				id: user.id ?? '',
+				username: user.username ?? user.login ?? user.name ?? '',
+				avatar: user.avatar ?? user.avatarUrl ?? user.avatar_url ?? '',
+				login: user.login ?? '',
+				name: user.name ?? '',
+				profileUrl: user.profileUrl ?? user.profile_url ?? '',
+			},
+		};
+	} catch {
+		return { ok: false, error: 'Network error' };
+	}
+}

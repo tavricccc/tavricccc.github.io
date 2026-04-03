@@ -56,6 +56,19 @@
 				/>
 			</div>
 
+			<div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+				<p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">Username</p>
+				<p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Display name shown on your comments. 2-30 characters. Will be reviewed by AI.</p>
+				<input
+					id="settings-username-input"
+					type="text"
+					placeholder="Your username"
+					minlength="2"
+					maxlength="30"
+					class="mt-3 w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500"
+				/>
+			</div>
+
 			<p id="settings-status" class="min-h-[1.25rem] text-sm text-zinc-500 dark:text-zinc-400"></p>
 
 			<div class="flex gap-3">
@@ -79,7 +92,7 @@
 </div>
 
 <script>
-	import { updateProfileAvatar } from '../lib/auth';
+	import { updateProfileAvatar, updateProfileUsername } from '../lib/auth';
 
 	const initSettingsModal = () => {
 		const modal = document.getElementById('settings-modal');
@@ -88,11 +101,14 @@
 		const settingsUsername = document.getElementById('settings-username');
 		const settingsLogin = document.getElementById('settings-login');
 		const avatarUrlInput = document.getElementById('settings-avatar-url') as HTMLInputElement | null;
+		const usernameInput = document.getElementById('settings-username-input') as HTMLInputElement | null;
 		const saveButton = document.getElementById('settings-save') as HTMLButtonElement | null;
 		const resetButton = document.getElementById('settings-reset') as HTMLButtonElement | null;
 		const status = document.getElementById('settings-status');
 		const fallbackAvatar = 'https://img.danarnoux.com/misc/DanArnoux.webp';
 		let currentAvatar = '';
+		let currentUsername = '';
+		let currentLogin = '';
 
 		const openModal = async () => {
 			if (!modal) return;
@@ -104,10 +120,13 @@
 					const user = await getCurrentUser();
 					if (user) {
 						currentAvatar = user.avatar || '';
+						currentUsername = user.username || user.name || '';
+						currentLogin = user.login || user.username || '';
 						if (settingsAvatar) settingsAvatar.src = currentAvatar || fallbackAvatar;
 						if (avatarUrlInput) avatarUrlInput.value = currentAvatar;
-						if (settingsUsername) settingsUsername.textContent = user.username || 'User';
-						if (settingsLogin) settingsLogin.textContent = '@' + (user.login || user.username || 'user');
+						if (settingsUsername) settingsUsername.textContent = currentUsername || 'User';
+						if (settingsLogin) settingsLogin.textContent = '@' + currentLogin;
+						if (usernameInput) usernameInput.value = currentUsername;
 						if (status) status.textContent = '';
 					}
 				} catch (e) {
@@ -153,14 +172,14 @@
 			}
 		};
 
-		const broadcastAvatarUpdate = (avatarUrl: string, username: string, login: string) => {
+		const broadcastUpdate = (avatarUrl: string, username: string, login: string) => {
 			window.dispatchEvent(new CustomEvent('blog:user-updated', {
 				detail: { avatarUrl, username, login },
 			}));
 		};
 
-		const saveAvatar = async () => {
-			if (!saveButton || !avatarUrlInput) return;
+		const saveAll = async () => {
+			if (!saveButton || !avatarUrlInput || !usernameInput) return;
 			saveButton.disabled = true;
 			const originalLabel = saveButton.textContent;
 			saveButton.textContent = 'Saving...';
@@ -168,24 +187,35 @@
 
 			try {
 				const nextAvatarUrl = avatarUrlInput.value.trim();
+				const nextUsername = usernameInput.value.trim();
 
-				if (!nextAvatarUrl) {
-					throw new Error('Enter an image URL');
+				// Update avatar if changed
+				if (nextAvatarUrl && nextAvatarUrl !== currentAvatar) {
+					const avatarResult = await updateProfileAvatar(nextAvatarUrl);
+					if (!avatarResult.ok || !avatarResult.user) {
+						throw new Error(avatarResult.error ?? 'Failed to save avatar');
+					}
+					currentAvatar = avatarResult.user.avatar || nextAvatarUrl;
 				}
 
-				const result = await updateProfileAvatar(nextAvatarUrl);
-				if (!result.ok || !result.user) {
-					throw new Error(result.error ?? 'Failed to save avatar');
+				// Update username if changed
+				if (nextUsername && nextUsername !== currentUsername) {
+					const usernameResult = await updateProfileUsername(nextUsername);
+					if (!usernameResult.ok || !usernameResult.user) {
+						throw new Error(usernameResult.error ?? 'Failed to save username');
+					}
+					currentUsername = usernameResult.user.name || usernameResult.user.username || nextUsername;
 				}
 
-				currentAvatar = result.user.avatar || nextAvatarUrl;
 				if (settingsAvatar) settingsAvatar.src = currentAvatar || fallbackAvatar;
-				if (settingsUsername) settingsUsername.textContent = result.user.username || 'User';
-				if (settingsLogin) settingsLogin.textContent = '@' + (result.user.login || result.user.username || 'user');
-				broadcastAvatarUpdate(currentAvatar, result.user.username || 'User', result.user.login || result.user.username || 'user');
-				setStatus('Avatar updated.', 'success');
+				if (settingsUsername) settingsUsername.textContent = currentUsername || 'User';
+				if (settingsLogin) settingsLogin.textContent = '@' + (currentLogin || currentUsername);
+				if (avatarUrlInput) avatarUrlInput.value = currentAvatar;
+				if (usernameInput) usernameInput.value = currentUsername;
+				broadcastUpdate(currentAvatar, currentUsername, currentLogin || currentUsername);
+				setStatus('Settings saved.', 'success');
 			} catch (error) {
-				const message = error instanceof Error ? error.message : 'Failed to save avatar';
+				const message = error instanceof Error ? error.message : 'Failed to save settings';
 				setStatus(message, 'error');
 			} finally {
 				saveButton.disabled = false;
@@ -195,6 +225,7 @@
 
 		const resetForm = () => {
 			if (avatarUrlInput) avatarUrlInput.value = currentAvatar;
+			if (usernameInput) usernameInput.value = currentUsername;
 			if (settingsAvatar) settingsAvatar.src = currentAvatar || fallbackAvatar;
 			setStatus('');
 		};
@@ -207,7 +238,7 @@
 
 		// Close on close button click
 		modalClose?.addEventListener('click', closeModal);
-		saveButton?.addEventListener('click', saveAvatar);
+		saveButton?.addEventListener('click', saveAll);
 		resetButton?.addEventListener('click', resetForm);
 		avatarUrlInput?.addEventListener('input', () => {
 			const value = avatarUrlInput.value.trim();
