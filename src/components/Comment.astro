@@ -24,6 +24,10 @@ const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 
 		<!-- Comment form - visible when logged in -->
 		<form id="comment-form" class="hidden space-y-4">
+			<div id="reply-to-indicator" class="hidden text-sm text-zinc-500 dark:text-zinc-400">
+				Replying to: <span id="reply-to-name"></span>
+				<button type="button" id="cancel-reply" class="ml-2 text-blue-600 hover:underline dark:text-blue-400">Cancel</button>
+			</div>
 			<textarea
 				id="comment-content"
 				name="content"
@@ -32,12 +36,15 @@ const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 				placeholder="Write a comment..."
 				class="w-full rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-zinc-900 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500"
 			></textarea>
-			<button
-				type="submit"
-				class="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-			>
-				Submit Comment
-			</button>
+			<div class="flex items-center justify-between">
+				<button
+					type="submit"
+					class="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+				>
+					Submit Comment
+				</button>
+				<span id="daily-limit-msg" class="hidden text-sm text-zinc-500 dark:text-zinc-400"></span>
+			</div>
 		</form>
 	</div>
 
@@ -45,12 +52,11 @@ const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 	<div id="comments-container" class="mt-8 space-y-6" data-comments-container data-post-slug={postSlug}></div>
 </section>
 
-<script is:inline>
-	// Use shared auth functions from auth.js
+<script>
 	const { storeTokenFromHash, getAuthToken, getCurrentUser } = window.__auth || {};
 
 	// Format relative time
-	const formatRelativeTime = (dateString) => {
+	const formatRelativeTime = (dateString: string) => {
 		const date = new Date(dateString);
 		const now = new Date();
 		const diff = now - date;
@@ -72,8 +78,41 @@ const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 		}
 	};
 
+	// Current user for reply tracking
+	let currentUser: any = null;
+	let replyingTo: { id: string; name: string } | null = null;
+
+	// Render a single comment with replies
+	const renderComment = (comment: any, isReply = false) => {
+		const replyCount = comment.replies?.length || 0;
+		const replyButton = !isReply && currentUser ? `<button class="reply-btn text-sm text-blue-600 hover:underline dark:text-blue-400" data-comment-id="${comment.id}" data-user-name="${comment.user?.name || comment.user?.login || 'Anonymous'}">Reply</button>` : '';
+
+		return `
+			<div class="flex gap-4 ${isReply ? 'ml-8 mt-4' : ''}">
+				<img
+					src="${comment.user?.avatarUrl || 'https://img.danarnoux.com/misc/DanArnoux.webp'}"
+					alt="${comment.user?.name || comment.user?.login || 'User'} avatar"
+					class="h-10 w-10 shrink-0 rounded-full border border-zinc-200 object-cover dark:border-zinc-700"
+				/>
+				<div class="min-w-0 flex-1">
+					<div class="flex items-center gap-2 flex-wrap">
+						<span class="font-medium text-zinc-900 dark:text-zinc-100">${comment.user?.name || comment.user?.login || 'Anonymous'}</span>
+						<span class="text-sm text-zinc-500 dark:text-zinc-400">${formatRelativeTime(comment.createdAt || comment.created_at)}</span>
+						${comment.status === 'pending' ? '<span class="text-xs text-yellow-600">(pending)</span>' : ''}
+					</div>
+					<p class="mt-1 text-zinc-700 dark:text-zinc-300">${comment.content || comment.body}</p>
+					<div class="mt-1 flex items-center gap-3">
+						${replyButton}
+						${replyCount > 0 ? `<span class="text-sm text-zinc-500 dark:text-zinc-400">${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</span>` : ''}
+					</div>
+				</div>
+			</div>
+			${comment.replies?.length > 0 ? `<div class="replies-container">${comment.replies.map((reply: any) => renderComment(reply, true)).join('')}</div>` : ''}
+		`;
+	};
+
 	// Render comments
-	const renderComments = (comments) => {
+	const renderComments = (comments: any[]) => {
 		const container = document.getElementById('comments-container');
 		if (!container) return;
 
@@ -82,70 +121,68 @@ const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 			return;
 		}
 
-		container.innerHTML = comments
-			.map(
-				(comment) => `
-			<div class="flex gap-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
-				<img
-					src="${comment.author?.avatar || 'https://img.danarnoux.com/misc/DanArnoux.webp'}"
-					alt="${comment.author?.username || 'User'} avatar"
-					class="h-10 w-10 shrink-0 rounded-full border border-zinc-200 object-cover dark:border-zinc-700"
-				/>
-				<div class="min-w-0 flex-1">
-					<div class="flex items-center gap-2">
-						<span class="font-medium text-zinc-900 dark:text-zinc-100">${comment.author?.username || 'Anonymous'}</span>
-						<span class="text-sm text-zinc-500 dark:text-zinc-400">${formatRelativeTime(comment.createdAt || comment.created_at)}</span>
-					</div>
-					<p class="mt-1 text-zinc-700 dark:text-zinc-300">${comment.content}</p>
-				</div>
-			</div>
-		`
-			)
-			.join('');
+		container.innerHTML = comments.map(c => renderComment(c)).join('');
+		attachReplyHandlers();
+	};
+
+	// Attach reply button handlers
+	const attachReplyHandlers = () => {
+		document.querySelectorAll('.reply-btn').forEach(btn => {
+			btn.addEventListener('click', (e) => {
+				const target = e.target as HTMLElement;
+				const commentId = target.dataset.commentId;
+				const userName = target.dataset.userName;
+				if (commentId && userName) {
+					replyingTo = { id: commentId, name: userName };
+					document.getElementById('reply-to-indicator')?.classList.remove('hidden');
+					document.getElementById('reply-to-name')!.textContent = userName;
+					document.getElementById('comment-content')?.focus();
+				}
+			});
+		});
 	};
 
 	// Load comments
-	async function loadComments(postSlug) {
+	async function loadComments(postSlug: string) {
 		const container = document.getElementById('comments-container');
-		if (!container) {
-			console.log('Comments container not found');
-			return;
-		}
-
-		console.log('Loading comments for:', postSlug);
+		if (!container) return;
 
 		try {
 			const response = await fetch(`${API_BASE}/api/comments?post_id=${encodeURIComponent(postSlug)}`);
 			if (response.ok) {
 				const data = await response.json();
-				const comments = data?.comments ?? data ?? [];
+				const comments = data?.comments ?? [];
 				renderComments(comments);
-			} else {
-				renderComments([]);
 			}
 		} catch (error) {
-			renderComments([]);
+			console.error('Failed to load comments:', error);
 		}
 	}
 
 	// Submit comment
-	async function submitComment(postSlug, content) {
+	async function submitComment(postSlug: string, content: string, parentId?: string) {
 		const token = getAuthToken();
-		if (!token) return false;
+		if (!token) return { ok: false, error: 'Not logged in' };
 
-		const response = await fetch(`${window.__API_BASE}/api/comments`, {
+		const body: any = {
+			post_id: postSlug,
+			content: content,
+		};
+		if (parentId) {
+			body.parent_id = parentId;
+		}
+
+		const response = await fetch(`${API_BASE}/api/comments`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`,
 			},
-			body: JSON.stringify({
-				post_id: postSlug,
-				content: content,
-			}),
+			body: JSON.stringify(body),
 		});
 
-		return response.ok;
+		const data = await response.json();
+		return { ok: response.ok, error: data.error };
 	}
 
 	// Initialize comments
@@ -157,13 +194,13 @@ const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 		if (!postSlug) return;
 
 		storeTokenFromHash();
+		currentUser = await getCurrentUser();
 
-		const user = await getCurrentUser();
 		const loginPrompt = document.getElementById('login-prompt');
 		const commentForm = document.getElementById('comment-form');
 
-		// Show comment form if logged in, otherwise show login prompt
-		if (user) {
+		// Show comment form if logged in
+		if (currentUser) {
 			if (loginPrompt) loginPrompt.classList.add('hidden');
 			if (commentForm) commentForm.classList.remove('hidden');
 		} else {
@@ -171,32 +208,48 @@ const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 			if (commentForm) commentForm.classList.add('hidden');
 		}
 
-		// Load demo comments for testing
+		// Load comments
 		loadComments(postSlug);
 
 		// Bind form submit
 		const form = document.getElementById('comment-form');
 		if (form && form.dataset.bound !== 'true') {
 			form.dataset.bound = 'true';
+
+			// Cancel reply handler
+			document.getElementById('cancel-reply')?.addEventListener('click', () => {
+				replyingTo = null;
+				document.getElementById('reply-to-indicator')?.classList.add('hidden');
+			});
+
 			form.addEventListener('submit', async (e) => {
 				e.preventDefault();
-				const textarea = document.getElementById('comment-content');
+				const textarea = document.getElementById('comment-content') as HTMLTextAreaElement;
 				const content = textarea?.value?.trim();
 				if (!content) return;
 
-				const button = form.querySelector('button[type="submit"]');
+				const button = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+				const dailyMsg = document.getElementById('daily-limit-msg');
 				if (button) {
 					button.disabled = true;
 					button.textContent = 'Submitting...';
 				}
 
-				const success = await submitComment(postSlug, content);
+				const result = await submitComment(postSlug, content, replyingTo?.id);
 
-				if (success) {
+				if (result.ok) {
 					textarea.value = '';
+					replyingTo = null;
+					document.getElementById('reply-to-indicator')?.classList.add('hidden');
 					loadComments(postSlug);
 				} else {
-					alert('Failed to submit comment. Please try again.');
+					alert(result.error || 'Failed to submit comment.');
+					if (result.error?.includes('Daily comment limit')) {
+						if (dailyMsg) {
+							dailyMsg.textContent = result.error;
+							dailyMsg.classList.remove('hidden');
+						}
+					}
 				}
 
 				if (button) {
@@ -205,8 +258,6 @@ const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 				}
 			});
 		}
-
-		loadComments(postSlug);
 	};
 
 	initComments();
