@@ -129,6 +129,36 @@ export async function sendEmailLogin(email: string, turnstileToken?: string): Pr
 	}
 }
 
+/**
+ * Send contact message
+ */
+export async function sendContactMessage(
+	name: string,
+	email: string,
+	message: string,
+	turnstileToken?: string
+): Promise<{ ok: boolean; error?: string }> {
+	try {
+		const response = await fetch(`${API_BASE}/api/contact`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ name, email, message, turnstileToken }),
+		});
+
+		const data = await response.json();
+
+		if (!response.ok) {
+			return { ok: false, error: data.error ?? 'Failed to send message' };
+		}
+
+		return { ok: true };
+	} catch {
+		return { ok: false, error: 'Network error' };
+	}
+}
+
 export async function updateProfileAvatar(avatarUrl: string): Promise<{ ok: boolean; user?: User; error?: string }> {
 	const token = getToken();
 	if (!token) {
