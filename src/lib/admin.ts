@@ -75,3 +75,11 @@ export async function deleteComment(id: string): Promise<{ success: boolean }> {
 	if (!res.ok) throw new Error('Failed to delete comment');
 	return res.json();
 }
+
+export async function checkAdmin(): Promise<{ isAdmin: boolean; email: string | null }> {
+	const res = await fetch(`${API_BASE}/api/admin/check`, {
+		headers: { 'CF-Access-Authenticated-User-Email': 'admin@placeholder.com' }
+	});
+	if (!res.ok) throw new Error('Failed to check admin status');
+	return res.json();
+}

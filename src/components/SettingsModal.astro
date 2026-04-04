@@ -105,6 +105,7 @@
 
 <script>
 	import { updateProfileAvatar, updateProfileUsername } from '../lib/auth';
+	import { checkAdmin } from '../lib/admin';
 
 	const initSettingsModal = () => {
 		const modal = document.getElementById('settings-modal');
@@ -121,7 +122,6 @@
 		let currentAvatar = '';
 		let currentUsername = '';
 		let currentLogin = '';
-		let currentIsAdmin = false;
 
 		const openModal = async () => {
 			if (!modal) return;
@@ -135,22 +135,29 @@
 						currentAvatar = user.avatar || '';
 						currentUsername = user.username || user.name || '';
 						currentLogin = user.login || user.username || '';
-						currentIsAdmin = user.isAdmin || false;
 						if (settingsAvatar) settingsAvatar.src = currentAvatar || fallbackAvatar;
 						if (avatarUrlInput) avatarUrlInput.value = currentAvatar;
 						if (settingsUsername) settingsUsername.textContent = currentUsername || 'User';
 						if (settingsLogin) settingsLogin.textContent = '@' + currentLogin;
 						if (usernameInput) usernameInput.value = currentUsername;
 						if (status) status.textContent = '';
-
-						// Show admin link if user is admin
-						const adminLink = document.getElementById('settings-admin-link');
-						if (adminLink) {
-							adminLink.style.display = currentIsAdmin ? '' : 'none';
-						}
 					}
 				} catch (e) {
 					console.error('Failed to load user info:', e);
+				}
+			}
+
+			// Check admin status via Cloudflare Access
+			try {
+				const { isAdmin } = await checkAdmin();
+				const adminLink = document.getElementById('settings-admin-link');
+				if (adminLink) {
+					adminLink.style.display = isAdmin ? '' : 'none';
+				}
+			} catch (e) {
+				const adminLink = document.getElementById('settings-admin-link');
+				if (adminLink) {
+					adminLink.style.display = 'none';
 				}
 			}
 
