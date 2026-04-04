@@ -77,9 +77,17 @@ export async function deleteComment(id: string): Promise<{ success: boolean }> {
 }
 
 export async function checkAdmin(): Promise<{ isAdmin: boolean; email: string | null }> {
-	const res = await fetch(`${API_BASE}/api/admin/check`, {
-		headers: { 'CF-Access-Authenticated-User-Email': 'admin@placeholder.com' }
-	});
-	if (!res.ok) throw new Error('Failed to check admin status');
-	return res.json();
+	// Note: This requires Cloudflare Access policy on api.danarnoux.com
+	// Cloudflare Access injects CF-Access-Authenticated-User-Email header
+	// when the user has an active Access session.
+	// Do NOT override this header - let Cloudflare inject the real value.
+	try {
+		const res = await fetch(`${API_BASE}/api/admin/check`, {
+			credentials: 'include'
+		});
+		if (!res.ok) return { isAdmin: false, email: null };
+		return res.json();
+	} catch {
+		return { isAdmin: false, email: null };
+	}
 }

@@ -30,9 +30,11 @@ A practical stack for writing, documenting, and maintaining a technical blog ove
 - Repo-page and root-path deployment support (GitHub Pages + Cloudflare Pages)
 - GitHub OAuth + Email login with session management
 - Comment system (D1 backed, per-post)
+- **Cloudflare Workers AI** - AI-powered comment moderation (online)
 - Cloudflare Turnstile captcha protection
 - R2 image hosting via `img.danarnoux.com`
 - User dropdown with Settings modal
+- Admin Dashboard - Cloudflare Access protected (under development)
 - 404 page
 
 ## System Architecture 🧱
@@ -62,8 +64,9 @@ The backend is built with:
 - **Cloudflare Workers** - Edge runtime for API handlers
 - **D1** - SQLite database for users, sessions, and comments
 - **R2** - Object storage for image hosting (`img.danarnoux.com`)
-- **KV** - Rate limiting for email login
+- **KV** - Rate limiting for email login and AI moderation cache
 - **Durable Objects** - Rate limiting mechanism
+- **Workers AI** - Llama 3 for comment moderation
 - **GitHub OAuth** - Authentication flow with PKCE
 - **Resend** - Email service for login links
 - **Cloudflare Turnstile** - Captcha protection
