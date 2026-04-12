@@ -178,4 +178,14 @@ export const links: FriendLink[] = [
 		tags: ['Programming', 'DevOps', 'Config'],
 		status: 'active',
 	},
+	{
+		name: 'XJKang',
+		kind: 'github',
+		github: 'XJKang',
+		url: 'https://kaoya.blog/',
+		description:
+			'A personal tech blog focused on development notes, practical problem-solving, and steady long-term tinkering.',
+		tags: ['Programming', 'Engineering', 'Notes'],
+		status: 'active',
+	},
 ];

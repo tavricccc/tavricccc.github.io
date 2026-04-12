@@ -505,6 +505,17 @@ const { showTocButton = false } = Astro.props as Props;
 
 		const root = document.documentElement;
 		const storageKey = 'theme';
+		const applyStoredTheme = () => {
+			const stored = localStorage.getItem(storageKey);
+			const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+			const theme = stored === 'dark' || stored === 'light'
+				? stored
+				: (systemPrefersDark ? 'dark' : 'light');
+			root.classList.toggle('dark', theme === 'dark');
+			root.dataset.theme = theme;
+			return theme === 'dark';
+		};
+
 		const updateAria = () => {
 			const isDark = root.classList.contains('dark');
 			buttons.forEach((button) => {
@@ -527,6 +538,7 @@ const { showTocButton = false } = Astro.props as Props;
 			});
 		});
 
+		applyStoredTheme();
 		updateAria();
 	};
 
