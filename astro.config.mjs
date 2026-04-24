@@ -78,9 +78,10 @@ function remarkGitHubAlertFallback() {
 
 const REPO_BASE = '/DansBlog/';
 const isCloudflarePages = Boolean(process.env.CF_PAGES);
+const isGitHubPages = Boolean(process.env.GITHUB_ACTIONS) || process.env.DEPLOY_TARGET === 'github-pages';
 const isProduction = process.env.NODE_ENV === 'production';
 // Cloudflare serves from "/", while GitHub Pages needs the repository subpath.
-const runtimeBase = isCloudflarePages ? '/' : isProduction ? REPO_BASE : '/';
+const runtimeBase = isCloudflarePages ? '/' : isGitHubPages && isProduction ? REPO_BASE : '/';
 const runtimeSite = 'https://danarnoux.com';
 
 /*
@@ -121,7 +122,17 @@ export default defineConfig({
 	base: runtimeBase,
 	trailingSlash: 'always',
 	output: 'static',
-	integrations: [mdx(), sitemap()],
+	integrations: [
+		mdx(),
+		sitemap({
+			filter: (page) => {
+				if (page === 'https://danarnoux.com/admin/' || page === 'https://danarnoux.com/important/') {
+					return false;
+				}
+				return !/^https:\/\/danarnoux\.com\/blog\/page\/\d+\/$/.test(page);
+			},
+		}),
+	],
 	markdown: {
 		// Keep markdown image URLs deployment-agnostic.
 		remarkPlugins: [remarkGitHubAlertFallback],

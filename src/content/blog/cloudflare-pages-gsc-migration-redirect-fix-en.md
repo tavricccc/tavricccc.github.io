@@ -148,7 +148,7 @@ Add one rule:
 | Field | Value |
 |-------|-------|
 | Source URL | `https://dansblog.pages.dev/*` |
-| Target URL | `https://danarnoux.com/$1` |
+| Target URL | `https://danarnoux.com/<matched-path>` |
 | Status | 301 (or use 302 for testing first) |
 | Preserve query string | Optional |
 | Subpath matching | ON |
@@ -157,7 +157,7 @@ Add one rule:
 Key points:
 
 - Use `*` to match all paths
-- Use `$1` to preserve the original path
+- Use the matched path placeholder to preserve the original path
 - Recommend using **302** first to test, then switch to **301** when confirmed
 
 > [!NOTE]

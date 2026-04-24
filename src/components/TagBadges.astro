@@ -3,6 +3,8 @@
  * Responsive tag badge renderer shared by list cards.
  * Encodes small-screen truncation rules so each page does not duplicate logic.
  */
+import { getTagSlug } from '../utils/tags';
+
 interface Props {
 	// Raw tag list from frontmatter.
 	tags?: string[];
@@ -37,7 +39,7 @@ const desktopRemaining = maxDesktop == null ? 0 : Math.max(cleanTags.length - de
 				{
 					mobileTags.map((tag) => (
 						<a
-							href={`${base}tags/${encodeURIComponent(tag)}/`}
+							href={`${base}tags/${encodeURIComponent(getTagSlug(tag))}/`}
 							class="apple-float-chip inline-flex min-w-0 max-w-[8.5rem] items-center truncate rounded-lg border border-zinc-300/90 bg-zinc-50/96 px-2.5 py-1 text-xs font-medium text-zinc-700 no-underline dark:border-zinc-700/90 dark:bg-zinc-900/96 dark:text-zinc-300"
 						>
 							<span class="apple-float-label truncate">{tag}</span>
@@ -56,7 +58,7 @@ const desktopRemaining = maxDesktop == null ? 0 : Math.max(cleanTags.length - de
 				{
 					desktopTags.map((tag) => (
 						<a
-							href={`${base}tags/${encodeURIComponent(tag)}/`}
+							href={`${base}tags/${encodeURIComponent(getTagSlug(tag))}/`}
 							class="apple-float-chip inline-flex min-w-0 max-w-[8.5rem] items-center truncate rounded-lg border border-zinc-300/90 bg-zinc-50/96 px-2.5 py-1 text-xs font-medium text-zinc-700 no-underline dark:border-zinc-700/90 dark:bg-zinc-900/96 dark:text-zinc-300"
 						>
 							<span class="apple-float-label truncate">{tag}</span>

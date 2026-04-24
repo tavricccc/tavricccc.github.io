@@ -1,4 +1,14 @@
 ---
-// Admin page disabled - redirect to home
-return Astro.redirect('/', 302);
+import BaseHead from '../../components/BaseHead.astro';
+
+Astro.response.status = 404;
 ---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title="404 - Admin Not Found | Dan's Blog" description="This page does not exist." />
+		<meta name="robots" content="noindex, nofollow" />
+	</head>
+	<body></body>
+</html>

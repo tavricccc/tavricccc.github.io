@@ -6,35 +6,39 @@ import Header from '../../components/Header.astro';
 import MobileDrawer from '../../components/MobileDrawer.astro';
 import PostCard from '../../components/PostCard.astro';
 import { SITE_TITLE } from '../../consts';
+import { getTagSlug, normalizeTagLabel } from '../../utils/tags';
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog');
-	const allTags = new Set<string>();
+	const allTags = new Map<string, string>();
 	for (const post of posts) {
 		for (const tag of post.data.tags ?? []) {
-			const normalized = tag.trim();
-			if (!normalized) continue;
-			allTags.add(normalized);
+			const label = normalizeTagLabel(tag);
+			if (!label) continue;
+			const slug = getTagSlug(label);
+			if (!allTags.has(slug)) allTags.set(slug, label);
 		}
 	}
 
-	return [...allTags].map((tag) => ({
-		params: { tag },
+	return [...allTags.entries()].map(([slug, label]) => ({
+		params: { tag: slug },
+		props: { displayTag: label },
 	}));
 }
 
 const BASE = import.meta.env.BASE_URL;
-const currentTag = decodeURIComponent(Astro.params.tag ?? '');
-const tagDescription = `Explore all articles tagged with "${currentTag}". Find tutorials, guides, and technical notes related to ${currentTag} on this blog.`;
+const currentTagSlug = decodeURIComponent(Astro.params.tag ?? '');
+const displayTag = Astro.props.displayTag ?? currentTagSlug;
+const tagDescription = `Explore all articles tagged with "${displayTag}". Find tutorials, guides, and technical notes related to ${displayTag} on this blog.`;
 const posts = (await getCollection('blog'))
-	.filter((post) => (post.data.tags ?? []).includes(currentTag))
+	.filter((post) => (post.data.tags ?? []).some((tag) => getTagSlug(tag) === currentTagSlug))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={`Tag: ${currentTag} | ${SITE_TITLE} - Articles & Tutorials`} description={tagDescription} />
+		<BaseHead title={`Tag: ${displayTag} | ${SITE_TITLE} - Articles & Tutorials`} description={tagDescription} />
 	</head>
 	<body>
 		<Header />
@@ -42,7 +46,7 @@ const posts = (await getCollection('blog'))
 		<main class="page-shell page-fade-in py-10 md:py-14" transition:name="page-main" transition:animate="fade">
 			<section class="section-enter mx-auto max-w-4xl">
 				<h1 class="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 md:text-4xl" transition:name="page-title" transition:animate="fade">
-					Tag: {currentTag}
+					Tag: {displayTag}
 				</h1>
 				<p class="mt-2 font-sans text-zinc-500 dark:text-zinc-400">
 					{posts.length} post{posts.length === 1 ? '' : 's'}

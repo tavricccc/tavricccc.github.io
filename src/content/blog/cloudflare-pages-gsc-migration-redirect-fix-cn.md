@@ -153,7 +153,7 @@ https://developers.cloudflare.com/pages/platform/how-pages-works/
 | 字段                  | 值                             |
 | --------------------- | ------------------------------ |
 | Source URL            | `https://dansblog.pages.dev/*` |
-| Target URL            | `https://danarnoux.com/$1`     |
+| Target URL            | `https://danarnoux.com/<matched-path>`     |
 | Status                | 301（或先用 302 测试）         |
 | Preserve query string | 可选                           |
 | Subpath matching      | ON                             |
