@@ -2,6 +2,7 @@ import rss from '@astrojs/rss';
 import type { APIContext } from 'astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { getPostLang as getPostLangBase } from './postAnalytics';
 
 interface RssFeedOptions {
 	posts: CollectionEntry<'blog'>[];
@@ -11,15 +12,8 @@ interface RssFeedOptions {
 	site?: string;
 }
 
-/**
- * Get post language from frontmatter or filename
- */
 export function getPostLang(post: CollectionEntry<'blog'>): string {
-	const meta = post.data as { lang?: string };
-	if (meta.lang === 'cn' || meta.lang === 'en') return meta.lang;
-
-	const idMatch = post.id.match(/-(cn|en)$/);
-	return idMatch?.[1] ?? 'en';
+	return getPostLangBase(post) ?? 'en';
 }
 
 /**

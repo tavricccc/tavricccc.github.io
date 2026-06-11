@@ -1,9 +1,4 @@
-/**
- * Auth helper for handling GitHub OAuth authentication
- */
-
-const API_BASE = import.meta.env.DEV ? 'http://localhost:8787' : 'https://api.danarnoux.com';
-const TOKEN_KEY = 'blog_token';
+import { API_BASE, TOKEN_KEY } from './config';
 
 export interface User {
 	id: string;

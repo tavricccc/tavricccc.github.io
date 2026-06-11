@@ -73,12 +73,7 @@ const Heading = titleTag;
 
 <script is:inline>
 	(() => {
-		const formatViewCount = (count) => {
-			const value = Number(count);
-			if (!Number.isFinite(value) || value < 0) return '0';
-			if (value >= 1000) return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1).replace(/\.0$/, '')}k`;
-			return value.toLocaleString('en-US');
-		};
+		const fmt = window.__formatCompactViewCount || function(c) { return String(Number(c) || 0); };
 
 		const loadPostCardViews = async () => {
 			const roots = Array.from(document.querySelectorAll('[data-post-card-views-root]'));
@@ -91,21 +86,33 @@ const Heading = titleTag;
 					.filter(Boolean)
 			)];
 
+			try {
+				const response = await fetch(apiBase + '/api/views/batch?posts=' + encodeURIComponent(uniqueKeys.join(',')));
+				if (response.ok) {
+					const data = await response.json();
+					var viewsMap = data.views || {};
+					uniqueKeys.forEach(function(key) {
+						var text = fmt(viewsMap[key] ?? 0);
+						document
+							.querySelectorAll('[data-post-card-views-root="' + key + '"] [data-post-card-views]')
+							.forEach(function(node) { node.textContent = text; });
+					});
+					return;
+				}
+			} catch {}
+
 			await Promise.all(uniqueKeys.map(async (key) => {
 				let text = '0';
 				try {
-					const response = await fetch(`${apiBase}/api/views?post=${encodeURIComponent(key)}`);
+					const response = await fetch(apiBase + '/api/views?post=' + encodeURIComponent(key));
 					if (response.ok) {
 						const data = await response.json();
-						text = formatViewCount(data?.views ?? 0);
+						text = fmt(data?.views ?? 0);
 					}
 				} catch {}
-
 				document
-					.querySelectorAll(`[data-post-card-views-root="${key}"] [data-post-card-views]`)
-					.forEach((node) => {
-						node.textContent = text;
-					});
+					.querySelectorAll('[data-post-card-views-root="' + key + '"] [data-post-card-views]')
+					.forEach(function(node) { node.textContent = text; });
 			}));
 		};
 

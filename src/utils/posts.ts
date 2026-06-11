@@ -1,13 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
+import { getPostLang } from './postAnalytics';
 
-/**
- * Get related posts based on tag similarity.
- * - Same language only
- * - Exclude current post
- * - Rank by number of overlapping tags
- * - At least 1 shared tag required
- * - Fallback to latest posts if no matches
- */
 export function getRelatedPosts(
 	currentPost: CollectionEntry<'blog'>,
 	allPosts: CollectionEntry<'blog'>[],
@@ -55,15 +48,4 @@ export function getRelatedPosts(
 		.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 	return sorted.slice(0, limit);
-}
-
-/**
- * Get post language from frontmatter or filename
- */
-function getPostLang(post: CollectionEntry<'blog'>): string | undefined {
-	const meta = post.data as { lang?: string };
-	if (meta.lang === 'cn' || meta.lang === 'en') return meta.lang;
-
-	const idMatch = post.id.match(/-(cn|en)$/);
-	return idMatch?.[1] as 'cn' | 'en' | undefined;
 }

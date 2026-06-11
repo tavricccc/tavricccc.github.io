@@ -241,6 +241,21 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 	})();
 </script>
 <script is:inline>
+	(function() {
+		window.__formatCompactViewCount = function(count) {
+			var v = Number(count);
+			if (!Number.isFinite(v) || v < 0) return '0';
+			if (v >= 1000) return (v / 1000).toFixed(v >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'k';
+			return v.toLocaleString('en-US');
+		};
+		window.__formatFullViewCount = function(count) {
+			var v = Number(count);
+			if (!Number.isFinite(v) || v < 0) return '0 views';
+			return v.toLocaleString('en-US') + ' ' + (v === 1 ? 'view' : 'views');
+		};
+	})();
+</script>
+<script is:inline>
 	(() => {
 		// Run once per browsing session: re-executing would stack a second
 		// MutationObserver and duplicate pointer listeners on document.

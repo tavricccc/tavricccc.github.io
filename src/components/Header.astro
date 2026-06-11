@@ -598,8 +598,6 @@ const { showTocButton = false } = Astro.props as Props;
 		const rssButton = document.getElementById('rss-button');
 		const rssMenu = document.getElementById('rss-menu');
 
-		console.log('RSS Dropdown init:', { rssDropdown: !!rssDropdown, rssButton: !!rssButton, rssMenu: !!rssMenu });
-
 		if (!rssDropdown || !rssButton || !rssMenu) return;
 
 		// Prevent double binding
@@ -610,7 +608,6 @@ const { showTocButton = false } = Astro.props as Props;
 			e.stopPropagation();
 			const isExpanded = rssButton.getAttribute('aria-expanded') === 'true';
 			rssButton.setAttribute('aria-expanded', String(!isExpanded));
-			console.log('Toggle dropdown, isExpanded:', isExpanded);
 			if (isExpanded) {
 				rssMenu.classList.add('hidden');
 			} else {

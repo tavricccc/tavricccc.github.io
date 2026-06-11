@@ -1,11 +1,11 @@
 ---
+import { API_BASE } from '../lib/config';
+
 interface Props {
 	postSlug: string;
 }
 
 const { postSlug } = Astro.props;
-const isDev = import.meta.env.DEV;
-const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 ---
 
 <section class="comments-section mt-12 border-t border-zinc-200 pt-8 dark:border-zinc-700">
@@ -54,12 +54,40 @@ const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 </section>
 
 <script>
-	const isDev = import.meta.env.DEV;
-	const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
+	const API_BASE = (window as any).__API_BASE || 'https://api.danarnoux.com';
 
 	const { storeTokenFromHash, getAuthToken, getCurrentUser } = (window as any).__auth || {};
 
-	// Format relative time
+	const escapeHtml = (str: string): string => {
+		return str
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	};
+
+	interface CommentUser {
+		id?: string;
+		login?: string;
+		name?: string | null;
+		avatarUrl?: string | null;
+		profileUrl?: string | null;
+	}
+
+	interface CommentData {
+		id: string;
+		parentId?: string | null;
+		postSlug?: string;
+		body?: string;
+		content?: string;
+		status?: string;
+		createdAt?: string;
+		created_at?: string;
+		user?: CommentUser;
+		replies?: CommentData[];
+	}
+
 	const formatRelativeTime = (dateString: string) => {
 		const date = new Date(dateString);
 		const now = new Date();
@@ -82,41 +110,44 @@ const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 		}
 	};
 
-	// Current user for reply tracking
-	let currentUser: any = null;
+	let currentUser: CommentUser | null = null;
 	let replyingTo: { id: string; name: string } | null = null;
 
-	// Render a single comment with replies
-	const renderComment = (comment: any, isReply = false) => {
+	const renderComment = (comment: CommentData, isReply = false): string => {
+		const userName = escapeHtml(comment.user?.name || comment.user?.login || 'Anonymous');
+		const avatarUrl = escapeHtml(comment.user?.avatarUrl || 'https://img.danarnoux.com/misc/DanArnoux.webp');
+		const commentId = escapeHtml(comment.id);
+		const commentBody = escapeHtml(comment.content || comment.body || '');
 		const replyCount = comment.replies?.length || 0;
-		const replyButton = !isReply && currentUser ? `<button class="reply-btn text-sm text-blue-600 hover:underline dark:text-blue-400" data-comment-id="${comment.id}" data-user-name="${comment.user?.name || comment.user?.login || 'Anonymous'}">Reply</button>` : '';
+		const replyButton = !isReply && currentUser
+			? `<button class="reply-btn text-sm text-blue-600 hover:underline dark:text-blue-400" data-comment-id="${commentId}" data-user-name="${userName}">Reply</button>`
+			: '';
 
 		return `
 			<div class="flex gap-4 ${isReply ? 'ml-8 mt-4' : ''}">
 				<img
-					src="${comment.user?.avatarUrl || 'https://img.danarnoux.com/misc/DanArnoux.webp'}"
-					alt="${comment.user?.name || comment.user?.login || 'User'} avatar"
+					src="${avatarUrl}"
+					alt="${userName} avatar"
 					class="h-10 w-10 shrink-0 rounded-full border border-zinc-200 object-cover dark:border-zinc-700"
 				/>
 				<div class="min-w-0 flex-1">
 					<div class="flex items-center gap-2 flex-wrap">
-						<span class="font-medium text-zinc-900 dark:text-zinc-100">${comment.user?.name || comment.user?.login || 'Anonymous'}</span>
-						<span class="text-sm text-zinc-500 dark:text-zinc-400">${formatRelativeTime(comment.createdAt || comment.created_at)}</span>
+						<span class="font-medium text-zinc-900 dark:text-zinc-100">${userName}</span>
+						<span class="text-sm text-zinc-500 dark:text-zinc-400">${formatRelativeTime(comment.createdAt || comment.created_at || '')}</span>
 						${comment.status === 'pending' ? '<span class="text-xs text-yellow-600">(pending)</span>' : ''}
 					</div>
-					<p class="mt-1 text-zinc-700 dark:text-zinc-300">${comment.content || comment.body}</p>
+					<p class="mt-1 text-zinc-700 dark:text-zinc-300">${commentBody}</p>
 					<div class="mt-1 flex items-center gap-3">
 						${replyButton}
 						${replyCount > 0 ? `<span class="text-sm text-zinc-500 dark:text-zinc-400">${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</span>` : ''}
 					</div>
 				</div>
 			</div>
-			${comment.replies?.length > 0 ? `<div class="replies-container">${comment.replies.map((reply: any) => renderComment(reply, true)).join('')}</div>` : ''}
+			${comment.replies?.length ? `<div class="replies-container">${comment.replies.map((reply) => renderComment(reply, true)).join('')}</div>` : ''}
 		`;
 	};
 
-	// Render comments
-	const renderComments = (comments: any[]) => {
+	const renderComments = (comments: CommentData[]) => {
 		const container = document.getElementById('comments-container');
 		if (!container) return;
 
@@ -168,7 +199,7 @@ const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 		const token = getAuthToken();
 		if (!token) return { ok: false, error: 'Not logged in' };
 
-		const body: any = {
+		const body: Record<string, string> = {
 			post_id: postSlug,
 			content: content,
 		};

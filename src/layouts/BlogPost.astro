@@ -10,6 +10,7 @@ import MobileDrawer from '../components/MobileDrawer.astro';
 import TocSidebar from '../components/TocSidebar.astro';
 import TocDrawer from '../components/TocDrawer.astro';
 import { getPostAnalyticsKey } from '../utils/postAnalytics';
+import { getTagSlug } from '../utils/tags';
 
 /* Blog post layout coordinates desktop TOC, mobile drawer TOC, and route-transition-safe scripts. */
 type Props = CollectionEntry<'blog'>['data'] & {
@@ -193,7 +194,7 @@ const charsLabel = chars.toLocaleString('en-US');
 								<div class="mt-4 flex flex-wrap gap-2">
 									{tags.map((tag) => (
 										<a
-											href={`${BASE}tags/${encodeURIComponent(tag)}/`}
+											href={`${BASE}tags/${encodeURIComponent(getTagSlug(tag))}/`}
 										class="inline-flex items-center rounded-md border border-zinc-300/90 bg-zinc-50/96 px-2.5 py-1 text-xs font-medium text-zinc-700 no-underline transition-colors duration-150 ease-out hover:border-zinc-400 hover:bg-white hover:text-zinc-900 dark:border-zinc-700/90 dark:bg-zinc-900/96 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
 										>
 											#{tag}
@@ -806,18 +807,8 @@ const charsLabel = chars.toLocaleString('en-US');
 				loadRelatedPostViews();
 			};
 
-			const formatViewCount = (count) => {
-				const value = Number(count);
-				if (!Number.isFinite(value) || value < 0) return '0 views';
-				return `${value.toLocaleString('en-US')} ${value === 1 ? 'view' : 'views'}`;
-			};
-
-			const formatCompactViewCount = (count) => {
-				const value = Number(count);
-				if (!Number.isFinite(value) || value < 0) return '0';
-				if (value >= 1000) return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1).replace(/\.0$/, '')}k`;
-				return value.toLocaleString('en-US');
-			};
+			const formatViewCount = window.__formatFullViewCount || function(c) { var v = Number(c); return (!Number.isFinite(v) || v < 0) ? '0 views' : v.toLocaleString('en-US') + ' ' + (v === 1 ? 'view' : 'views'); };
+			const formatCompactViewCount = window.__formatCompactViewCount || function(c) { var v = Number(c); return (!Number.isFinite(v) || v < 0) ? '0' : v >= 1000 ? (v/1000).toFixed(v >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'k' : v.toLocaleString('en-US'); };
 
 			const loadPostViews = async () => {
 				const root = document.querySelector('[data-post-views-root]');
