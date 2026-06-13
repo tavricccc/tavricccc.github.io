@@ -1387,6 +1387,28 @@ section {
 	background-color: rgba(170, 170, 170, 0.52);
 }
 
+/* Mobile TOC drawer: roomier tap targets and a gold active rail so the current
+   section reads clearly on small screens. Higher specificity than the JS-applied
+   active classes, so it wins without !important. */
+[data-toc='drawer'] [data-toc-link] {
+	padding-top: 0.6rem;
+	padding-bottom: 0.6rem;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+[data-toc='drawer'] [data-toc-link][aria-current='true'] {
+	border-left-color: rgba(180, 126, 36, 0.85);
+	background: rgba(180, 126, 36, 0.09);
+	color: rgb(39 39 42);
+}
+
+html.dark [data-toc='drawer'] [data-toc-link][aria-current='true'] {
+	border-left-color: rgba(226, 190, 110, 0.8);
+	background: rgba(226, 190, 110, 0.1);
+	color: rgb(244 244 245);
+}
+
 .sr-only {
 	position: absolute;
 	width: 1px;

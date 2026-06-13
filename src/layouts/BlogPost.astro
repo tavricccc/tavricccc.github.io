@@ -765,7 +765,19 @@ const charsLabel = chars.toLocaleString('en-US');
 					const doc = document.documentElement;
 					const max = Math.max(1, doc.scrollHeight - window.innerHeight);
 					const progress = Math.min(1, Math.max(0, window.scrollY / max));
-					button.classList.toggle('is-visible', window.scrollY > 480);
+					// Surface while scrolling; fade out 3s after scrolling stops, unless
+						// the pointer/focus is holding it (tracked via data-held).
+						if (window.scrollY > 480) {
+							button.classList.add('is-visible');
+							if (window.__backToTopIdle) clearTimeout(window.__backToTopIdle);
+							window.__backToTopIdle = window.setTimeout(() => {
+								window.__backToTopIdle = 0;
+								if (button.dataset.held !== 'true') button.classList.remove('is-visible');
+							}, 3000);
+						} else {
+							if (window.__backToTopIdle) { clearTimeout(window.__backToTopIdle); window.__backToTopIdle = 0; }
+							button.classList.remove('is-visible');
+						}
 					if (ring instanceof SVGElement) {
 						ring.style.strokeDashoffset = String(circumference * (1 - progress));
 					}
@@ -776,6 +788,26 @@ const charsLabel = chars.toLocaleString('en-US');
 
 				if (button.dataset.bound !== 'true') {
 					button.dataset.bound = 'true';
+						// Hover/focus holds the button visible so it never vanishes mid-reach.
+						const holdBackToTop = () => {
+							button.dataset.held = 'true';
+							if (window.__backToTopIdle) { clearTimeout(window.__backToTopIdle); window.__backToTopIdle = 0; }
+							if (window.scrollY > 480) button.classList.add('is-visible');
+						};
+						const releaseBackToTop = () => {
+							button.dataset.held = 'false';
+							if (window.scrollY > 480) {
+								if (window.__backToTopIdle) clearTimeout(window.__backToTopIdle);
+								window.__backToTopIdle = window.setTimeout(() => {
+									window.__backToTopIdle = 0;
+									if (button.dataset.held !== 'true') button.classList.remove('is-visible');
+								}, 3000);
+							}
+						};
+						button.addEventListener('pointerenter', holdBackToTop);
+						button.addEventListener('focusin', holdBackToTop);
+						button.addEventListener('pointerleave', releaseBackToTop);
+						button.addEventListener('focusout', releaseBackToTop);
 					button.addEventListener('click', () => {
 						const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 						window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });

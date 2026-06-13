@@ -8,6 +8,15 @@ import { getNavLinks } from '../data/navLinks';
  */
 const BASE = import.meta.env.BASE_URL;
 const NAV_LINKS = getNavLinks(BASE);
+
+// Segment-level active detection so the current section is highlighted in the drawer.
+const pathname = Astro.url.pathname.replace(BASE, '/');
+const firstSegment = pathname.match(/[^\/]+/g)?.[0];
+const firstSegmentPath = firstSegment ? `/${firstSegment}/` : '/';
+const isActive = (href: string) => {
+	const normalized = href.replace(BASE, '/').replace(/\/+$/, '/') || '/';
+	return normalized === pathname || normalized === firstSegmentPath;
+};
 ---
 
 <div
@@ -17,12 +26,15 @@ const NAV_LINKS = getNavLinks(BASE);
 ></div>
 <aside
 	id="mobile-drawer"
-	class="pointer-events-auto fixed left-0 top-0 z-[90] flex h-[100dvh] w-[88vw] max-w-sm -translate-x-full flex-col border-r border-zinc-200 bg-white/95 p-4 shadow-2xl backdrop-blur transition-transform duration-200 ease-out motion-reduce:transition-none md:hidden dark:border-zinc-800 dark:bg-zinc-950/95 [will-change:transform] hidden"
+	class="pointer-events-auto fixed left-0 top-0 z-[90] flex h-[100dvh] w-[88vw] max-w-sm -translate-x-full flex-col border-r border-zinc-200 bg-white/95 p-4 shadow-2xl backdrop-blur transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:hidden dark:border-zinc-800 dark:bg-zinc-950/95 [will-change:transform] hidden"
 	aria-label="Mobile navigation"
 	aria-hidden="true"
 >
-	<div class="mb-6 flex items-center justify-between">
-		<p class="m-0 text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">{SITE_TITLE}</p>
+	<div class="mb-5 flex items-center justify-between border-b border-zinc-200/70 pb-4 dark:border-zinc-800/70">
+		<a href={BASE} data-drawer-link class="brand-wordmark m-0 inline-flex items-baseline gap-1 text-[1.35rem] leading-none text-zinc-900 no-underline dark:text-zinc-100">
+			<span>Dan<span class="brand-apostrophe">&rsquo;</span>s</span>
+			<span class="italic text-zinc-500 dark:text-zinc-400">Blog</span>
+		</a>
 		<button
 			type="button"
 			id="mobile-menu-close"
@@ -34,20 +46,70 @@ const NAV_LINKS = getNavLinks(BASE);
 			</svg>
 		</button>
 	</div>
-	<nav class="flex flex-col gap-2">
+	<nav class="flex flex-col gap-1.5">
 		{
-			NAV_LINKS.map((link) => (
-				<a
-					href={link.href}
-					data-drawer-link
-					class="block rounded-xl px-4 py-3 text-base font-medium text-zinc-700 no-underline transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-				>
-					{link.label}
-				</a>
-			))
+			NAV_LINKS.map((link, i) => {
+				const active = isActive(link.href);
+				return (
+					<a
+						href={link.href}
+						data-drawer-link
+						aria-current={active ? 'page' : undefined}
+						style={`--i: ${i}`}
+						class:list={[
+							'drawer-link group flex items-center justify-between rounded-xl border border-transparent px-4 py-3.5 text-[15px] font-medium no-underline transition-colors',
+							active
+								? 'bg-[rgba(180,126,36,0.1)] text-zinc-900 dark:bg-[rgba(226,190,110,0.12)] dark:text-zinc-50'
+								: 'text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-100',
+						]}
+					>
+						<span class="inline-flex items-center gap-2.5">
+							<span
+								class:list={[
+									'h-4 w-[3px] rounded-full transition-colors',
+									active ? 'bg-[rgb(180,126,36)] dark:bg-[rgb(226,190,110)]' : 'bg-transparent group-hover:bg-zinc-300 dark:group-hover:bg-zinc-600',
+								]}
+								aria-hidden="true"
+							/>
+							{link.label}
+						</span>
+						<svg viewBox="0 0 20 20" class:list={['h-4 w-4 transition-all', active ? 'text-[rgb(180,126,36)] opacity-90 dark:text-[rgb(226,190,110)]' : 'text-zinc-400 opacity-0 group-hover:opacity-70']} fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+							<path d="M7.5 5 12.5 10l-5 5" stroke-linecap="round" stroke-linejoin="round" />
+						</svg>
+					</a>
+				);
+			})
 		}
 	</nav>
 </aside>
+
+<style is:global>
+	/* Staggered entrance: links settle in one after another as the drawer slides
+	   open (keyed off the .translate-x-0 open state, so no JS wiring needed). */
+	#mobile-drawer [data-drawer-link] {
+		opacity: 0;
+		transform: translateX(-7px);
+	}
+
+	#mobile-drawer.translate-x-0 [data-drawer-link] {
+		opacity: 1;
+		transform: none;
+		transition: opacity 300ms ease, transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+		transition-delay: calc(var(--i, 0) * 45ms);
+	}
+
+	#mobile-drawer .drawer-link:active {
+		transform: scale(0.985);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		#mobile-drawer [data-drawer-link] {
+			opacity: 1 !important;
+			transform: none !important;
+			transition: none !important;
+		}
+	}
+</style>
 
 <script is:inline>
 	const initMobileDrawer = () => {
