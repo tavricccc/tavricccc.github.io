@@ -200,7 +200,11 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 
 				return {
 					id: user.id ?? '',
-					username: user.username ?? user.login ?? user.name ?? '',
+					// Editable display name (`name`) wins over the immutable GitHub
+					// handle (`login`), so an edited username survives a refresh.
+					username: user.username ?? user.name ?? user.login ?? '',
+					login: user.login ?? '',
+					name: user.name ?? '',
 					avatar: user.avatar ?? user.avatarUrl ?? user.avatar_url ?? '',
 				};
 			} catch {

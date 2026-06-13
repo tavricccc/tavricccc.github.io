@@ -67,7 +67,7 @@ export async function getUser(): Promise<User | null> {
 
 		return {
 			id: user.id ?? '',
-			username: user.username ?? user.login ?? user.name ?? '',
+			username: user.username ?? user.name ?? user.login ?? '',
 			avatar: user.avatar ?? user.avatarUrl ?? user.avatar_url ?? '',
 			login: user.login ?? '',
 			name: user.name ?? '',
@@ -184,7 +184,7 @@ export async function updateProfileAvatar(avatarUrl: string): Promise<{ ok: bool
 			ok: true,
 			user: {
 				id: user.id ?? '',
-				username: user.username ?? user.login ?? user.name ?? '',
+				username: user.username ?? user.name ?? user.login ?? '',
 				avatar: user.avatar ?? user.avatarUrl ?? user.avatar_url ?? '',
 				login: user.login ?? '',
 				name: user.name ?? '',
@@ -226,7 +226,7 @@ export async function updateProfileUsername(username: string): Promise<{ ok: boo
 			ok: true,
 			user: {
 				id: user.id ?? '',
-				username: user.username ?? user.login ?? user.name ?? '',
+				username: user.username ?? user.name ?? user.login ?? '',
 				avatar: user.avatar ?? user.avatarUrl ?? user.avatar_url ?? '',
 				login: user.login ?? '',
 				name: user.name ?? '',
