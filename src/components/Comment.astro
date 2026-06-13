@@ -254,7 +254,7 @@ const { postSlug } = Astro.props;
 		});
 
 		const data = await response.json();
-		return { ok: response.ok, error: data.error };
+		return { ok: response.ok, error: data.error, status: data.comment?.status as string | undefined };
 	}
 
 	// Initialize comments
@@ -314,6 +314,9 @@ const { postSlug } = Astro.props;
 					replyingTo = null;
 					document.getElementById('reply-to-indicator')?.classList.add('hidden');
 					loadComments(postSlug);
+					if (result.status === 'pending') {
+						alert('Your comment is awaiting review and will appear once approved. / 评论已提交，待博主审核通过后显示。');
+					}
 				} else {
 					alert(result.error || 'Failed to submit comment.');
 					if (result.error?.includes('Daily comment limit')) {
