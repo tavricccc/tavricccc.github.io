@@ -6,17 +6,17 @@
  *
  * Usage:
  *   npm run indexnow:sitemap   # Notify all URLs from sitemap
- *   npm run indexnow -- https://ying0930.github.io/blog/new-post/  # Notify single URL
+ *   npm run indexnow -- https://tavricccc.github.io/blog/new-post/  # Notify single URL
  *
  * Required env vars (set in Cloudflare Pages):
  *   INDEXNOW_KEY    - Your IndexNow key
- *   INDEXNOW_HOST   - Your domain (optional, defaults to ying0930.github.io)
+ *   INDEXNOW_HOST   - Your domain (optional, defaults to tavricccc.github.io)
  */
 
 
 // IndexNow config from environment variables
 const KEY = process.env.INDEXNOW_KEY;
-const HOST = process.env.INDEXNOW_HOST || 'ying0930.github.io';
+const HOST = process.env.INDEXNOW_HOST || 'tavricccc.github.io';
 
 // Bing IndexNow endpoint
 const BING_URL = 'https://www.bing.com/indexnow';
@@ -132,7 +132,7 @@ async function main() {
 	if (args.length === 0) {
 		console.log('Usage: node scripts/indexnow.mjs <url1> <url2> ...');
 		console.log('   or: node scripts/indexnow.mjs sitemap');
-		console.log('   or: node scripts/indexnow.mjs https://ying0930.github.io/blog/new-post/');
+		console.log('   or: node scripts/indexnow.mjs https://tavricccc.github.io/blog/new-post/');
 		process.exit(0);
 	}
 
@@ -141,13 +141,13 @@ async function main() {
 	if (args[0] === 'sitemap') {
 		// Fetch from sitemap
 		console.log('📥 Fetching URLs from sitemap...');
-		urls = await fetchUrlsFromSitemap(`https://ying0930.github.io/sitemap.xml`);
+		urls = await fetchUrlsFromSitemap(`https://tavricccc.github.io/sitemap.xml`);
 		console.log(`   Found ${urls.length} URLs`);
 	} else {
 		// Use provided URLs
 		urls = args.map((url) => {
 			// Ensure URL has protocol
-			return url.startsWith('http') ? url : `https://ying0930.github.io${url.startsWith('/') ? '' : '/'}${url}`;
+			return url.startsWith('http') ? url : `https://tavricccc.github.io${url.startsWith('/') ? '' : '/'}${url}`;
 		});
 	}
 
