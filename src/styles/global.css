@@ -1409,8 +1409,7 @@ html.dark [data-toc='drawer'] [data-toc-link][aria-current='true'] {
 	color: rgb(244 244 245);
 }
 
-/* Shared form field: rounded, calm, with a soft gold focus ring. Used by the
-   comment form and the contact/settings modals so inputs feel on-brand. */
+	/* Shared form field: rounded, calm, with a soft gold focus ring. */
 .field-input {
 	width: 100%;
 	border-radius: 0.75rem;

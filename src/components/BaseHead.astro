@@ -40,12 +40,6 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 <link rel="icon" type="image/svg+xml" href={`${BASE}favicon.svg`} />
 <link rel="apple-touch-icon" sizes="180x180" href={`${BASE}image/apple-touch-icon.png`} />
 <link rel="sitemap" href={`${BASE}sitemap-index.xml`} />
-<link
-	rel="alternate"
-	type="application/rss+xml"
-	title={SITE_TITLE}
-	href={`${BASE}rss.xml`}
-/>
 <meta name="generator" content={Astro.generator} />
 
 <!-- Font preconnect -->
@@ -136,130 +130,6 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 	})();
 </script>
 <script is:inline>
-	// Token handling and auth functions - expose to window for global access
-	(function() {
-		// Dynamically determine API base based on current host
-		const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-		const API_BASE = isLocalhost ? 'http://localhost:8787' : 'https://api.danarnoux.com';
-		const TOKEN_KEY = 'blog_token';
-
-		// Store on window
-		window.__API_BASE = API_BASE;
-		window.__TOKEN_KEY = TOKEN_KEY;
-
-		// Read token from URL hash
-		function readHashToken() {
-			const hash = window.location.hash || '';
-			const match = hash.match(/(?:^#|&)token=([^&]+)/);
-			if (!match) return null;
-			try {
-				return decodeURIComponent(match[1]);
-			} catch {
-				return match[1];
-			}
-		}
-
-		// Store token from URL hash to localStorage
-		function storeTokenFromHash() {
-			const token = readHashToken();
-			if (!token) return null;
-			localStorage.setItem(TOKEN_KEY, token);
-			history.replaceState(null, '', window.location.pathname);
-			return token;
-		}
-
-		// Get auth token
-		function getAuthToken() {
-			storeTokenFromHash();
-			return localStorage.getItem(TOKEN_KEY);
-		}
-
-		// Get current user
-		async function getCurrentUser() {
-			const token = getAuthToken();
-			if (!token) return null;
-
-			try {
-				const response = await fetch(`${API_BASE}/api/me`, {
-					method: 'GET',
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-
-				if (!response.ok) {
-					if (response.status === 401) {
-						localStorage.removeItem(TOKEN_KEY);
-					}
-					return null;
-				}
-
-				const data = await response.json();
-				const user = data?.user ?? data ?? null;
-				if (!user || typeof user !== 'object') return null;
-
-				return {
-					id: user.id ?? '',
-					// Editable display name (`name`) wins over the immutable GitHub
-					// handle (`login`), so an edited username survives a refresh.
-					username: user.username ?? user.name ?? user.login ?? '',
-					login: user.login ?? '',
-					name: user.name ?? '',
-					avatar: user.avatar ?? user.avatarUrl ?? user.avatar_url ?? '',
-				};
-			} catch {
-				return null;
-			}
-		}
-
-		// Logout
-		async function logout() {
-			const token = getAuthToken();
-			if (!token) {
-				localStorage.removeItem(TOKEN_KEY);
-				return;
-			}
-
-			try {
-				await fetch(`${API_BASE}/api/auth/logout`, {
-					method: 'POST',
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-			} finally {
-				localStorage.removeItem(TOKEN_KEY);
-			}
-		}
-
-		// Initial token processing on page load
-		storeTokenFromHash();
-
-		// Expose to window
-		window.__auth = {
-			storeTokenFromHash,
-			getAuthToken,
-			getCurrentUser,
-			logout,
-		};
-	})();
-</script>
-<script is:inline>
-	(function() {
-		window.__formatCompactViewCount = function(count) {
-			var v = Number(count);
-			if (!Number.isFinite(v) || v < 0) return '0';
-			if (v >= 1000) return (v / 1000).toFixed(v >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'k';
-			return v.toLocaleString('en-US');
-		};
-		window.__formatFullViewCount = function(count) {
-			var v = Number(count);
-			if (!Number.isFinite(v) || v < 0) return '0 views';
-			return v.toLocaleString('en-US') + ' ' + (v === 1 ? 'view' : 'views');
-		};
-	})();
-</script>
-<script is:inline>
 	(() => {
 		// Run once per browsing session: re-executing would stack a second
 		// MutationObserver and duplicate pointer listeners on document.
@@ -309,7 +179,6 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 			'select',
 			'[role="button"]',
 			'[role="tab"]',
-			'[data-auth-login]',
 			'.apple-float-chip',
 			'.icon-button',
 		].join(',');
