@@ -58,7 +58,10 @@ async function cleanGeneratedContent() {
 }
 
 async function generatePost({ databaseTitle, page }) {
-	const title = getTitleProperty(page.properties.Name) || 'Untitled';
+	const titlePropertyName = findPropertyName(page.properties, ['Name', '名稱'], 'title');
+	const datePropertyName = findPropertyName(page.properties, ['Published Date', '日期'], 'date');
+	const tagsPropertyName = findPropertyName(page.properties, ['Tags'], 'multi_select', 'select');
+	const title = getTitleProperty(page.properties[titlePropertyName]) || 'Untitled';
 	const baseSlug = slugify(title) || 'untitled';
 	const slug = uniqueSlug(baseSlug, slugify(databaseTitle));
 	const postImageDir = path.join(GENERATED_IMAGE_DIR, slug);
@@ -67,8 +70,8 @@ async function generatePost({ databaseTitle, page }) {
 	const blocks = await getBlockChildren(page.id);
 	const markdownBody = (await renderBlocks(blocks, imageContext)).trim();
 	const description = getDescription(markdownBody);
-	const tags = uniqueTags([databaseTitle, ...getTagsProperty(page.properties.Tags)]);
-	const publishedDate = getDateProperty(page.properties['Published Date']) || toDateOnly(page.created_time);
+	const tags = uniqueTags([databaseTitle, ...getTagsProperty(page.properties[tagsPropertyName])]);
+	const publishedDate = getDateProperty(page.properties[datePropertyName]) || toDateOnly(page.created_time);
 	const updatedDate = toDateOnly(page.last_edited_time);
 
 	const frontmatter = [
@@ -96,17 +99,17 @@ async function getChildDatabases(pageId) {
 }
 
 async function queryPublishedPages(database) {
-	validateDatabase(database);
+	const propertyNames = validateDatabase(database);
 
-	const statusProp = database.properties.Status;
+	const statusProp = database.properties[propertyNames.status];
 
 	let filter;
 	if (statusProp.type === 'status') {
-		filter = { property: 'Status', status: { equals: PUBLISHED_STATUS } };
+		filter = { property: propertyNames.status, status: { equals: PUBLISHED_STATUS } };
 	} else if (statusProp.type === 'select') {
-		filter = { property: 'Status', select: { equals: PUBLISHED_STATUS } };
+		filter = { property: propertyNames.status, select: { equals: PUBLISHED_STATUS } };
 	} else if (statusProp.type === 'checkbox') {
-		filter = { property: 'Status', checkbox: { equals: true } };
+		filter = { property: propertyNames.status, checkbox: { equals: true } };
 	} else {
 		fail(`Database "${getDatabaseTitle(database)}" has unsupported Status type: ${statusProp.type}.`);
 	}
@@ -118,7 +121,7 @@ async function queryPublishedPages(database) {
 			method: 'POST',
 			body: JSON.stringify({
 				filter,
-				sorts: [{ property: 'Published Date', direction: 'descending' }],
+				sorts: [{ property: propertyNames.publishedDate, direction: 'descending' }],
 				page_size: 100,
 				...(cursor ? { start_cursor: cursor } : {}),
 			}),
@@ -131,26 +134,29 @@ async function queryPublishedPages(database) {
 
 function validateDatabase(database) {
 	const title = getDatabaseTitle(database);
-	for (const required of ['Name', 'Status', 'Published Date', 'Tags']) {
-		if (!database.properties[required]) {
-			fail(`Database "${title}" is missing the ${required} property.`);
-		}
-	}
+	const names = {
+		name: findPropertyName(database.properties, ['Name', '名稱'], 'title'),
+		status: findPropertyName(database.properties, ['Status'], 'status', 'select', 'checkbox'),
+		publishedDate: findPropertyName(database.properties, ['Published Date', '日期'], 'date'),
+		tags: findPropertyName(database.properties, ['Tags'], 'multi_select', 'select'),
+	};
 
-	const nameProp = database.properties.Name;
+	const nameProp = database.properties[names.name];
 	if (nameProp.type !== 'title') {
-		fail(`Database "${title}" property Name must be a title property.`);
+		fail(`Database "${title}" title property must be a title property.`);
 	}
 
-	const dateProp = database.properties['Published Date'];
+	const dateProp = database.properties[names.publishedDate];
 	if (dateProp.type !== 'date') {
-		fail(`Database "${title}" property Published Date must be a date property.`);
+		fail(`Database "${title}" published date property must be a date property.`);
 	}
 
-	const tagsProp = database.properties.Tags;
+	const tagsProp = database.properties[names.tags];
 	if (!['multi_select', 'select'].includes(tagsProp.type)) {
 		fail(`Database "${title}" property Tags must be multi-select or select.`);
 	}
+
+	return names;
 }
 
 async function getBlockChildren(blockId) {
@@ -385,6 +391,17 @@ function getDatabaseTitle(database) {
 function getTitleProperty(property) {
 	if (!property || property.type !== 'title') return '';
 	return richTextPlain(property.title).trim();
+}
+
+function findPropertyName(properties, preferredNames, ...allowedTypes) {
+	for (const name of preferredNames) {
+		if (properties[name] && allowedTypes.includes(properties[name].type)) return name;
+	}
+
+	const found = Object.entries(properties).find(([, property]) => allowedTypes.includes(property.type));
+	if (found) return found[0];
+
+	fail(`Missing Notion property. Expected one of ${preferredNames.join(', ')} or any ${allowedTypes.join('/')} property.`);
 }
 
 function getTagsProperty(property) {
