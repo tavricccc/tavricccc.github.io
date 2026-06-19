@@ -1,4 +1,4 @@
-# Dan's Blog
+# Tavric's Blog
 
 A static Astro + Tailwind personal blog for research notes, engineering workflows, and reproducible long-form writing.
 

@@ -1,4 +1,4 @@
-# Dan's Blog
+# Tavric's Blog
 
 基于 Astro + Tailwind 的静态个人博客，用于记录研究笔记、工程流程和可复现的长文写作。
 
