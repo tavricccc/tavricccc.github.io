@@ -109,7 +109,7 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 		window.__syncThemeColor(theme === 'dark');
 	})();
 </script>
-<script is:inline>
+<script is:inline define:vars={{ BASE }}>
 	(() => {
 		// Run once per browsing session: re-executing would stack a second
 		// MutationObserver and duplicate pointer listeners on document.
@@ -364,7 +364,7 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 		initCursor();
 	})();
 </script>
-<script is:inline>
+<script is:inline define:vars={{ BASE }}>
 	(() => {
 		/*
 		 * Polish-layer interactions shared by every page:
@@ -430,8 +430,9 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 		// The data attribute is consumed by ::view-transition CSS in global.css.
 		{
 			const NAV_ORDER = { '': 0, blog: 1, tags: 2, links: 3, about: 4 };
+			const repoSegment = BASE.split('/').filter(Boolean)[0] || '';
 			const segmentFor = (url) => {
-				const parts = url.pathname.split('/').filter(Boolean).filter((p) => p !== 'DansBlog');
+				const parts = url.pathname.split('/').filter(Boolean).filter((p) => p !== repoSegment);
 				return parts[0] || '';
 			};
 
