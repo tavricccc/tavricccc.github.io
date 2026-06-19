@@ -7,9 +7,11 @@ export default {
 	theme: {
 		extend: {
 			fontFamily: {
-				sans: ['"Alibaba PuHuiTi"', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
-				serif: ['"Source Han Serif SC"', '"Noto Serif SC"', '"Songti SC"', 'serif'],
-				mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+				display: ['"HarmonyOS Sans TC"', '"HarmonyOS Sans SC"', 'system-ui', 'sans-serif'],
+				body: ['"HarmonyOS Sans TC"', '"HarmonyOS Sans SC"', 'system-ui', 'sans-serif'],
+				sans: ['"HarmonyOS Sans TC"', '"HarmonyOS Sans SC"', 'system-ui', 'sans-serif'],
+				serif: ['"HarmonyOS Sans TC"', '"HarmonyOS Sans SC"', 'system-ui', 'sans-serif'],
+				mono: ['"JetBrains Mono"', 'monospace'],
 			},
 		},
 	},

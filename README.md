@@ -165,7 +165,7 @@ Code-heavy pages are sensitive to timing between transitions and late style/font
 - stable code metrics (`line-height: 1.6`, ligatures disabled)
 - container-level horizontal overflow
 - font policy split by role:
-  - Inter + Noto Serif SC: `display=swap`
+  - HarmonyOS Sans TC/SC: `display=swap`
   - JetBrains Mono: `display=optional`
 
 ### 4) TOC Geometry and Rebinding
