@@ -11,10 +11,10 @@ export type ProjectLink = {
 
 export const links: ProjectLink[] = [
 	{
-		name: 'tavrics',
+		name: 'tavricccc.github.io',
 		kind: 'project',
-		github: 'ying0930',
-		url: 'https://github.com/ying0930/tavrics',
+		github: 'tavricccc',
+		url: 'https://github.com/tavricccc/tavricccc.github.io',
 		description: 'The source repository for Tavric\'s Blog.',
 		tags: ['GitHub', 'Blog', 'Astro'],
 		status: 'active',
@@ -22,8 +22,8 @@ export const links: ProjectLink[] = [
 	{
 		name: 'NNKIEH-SRP',
 		kind: 'project',
-		github: 'ying0930',
-		url: 'https://github.com/ying0930/NNKIEH-SRP',
+		github: 'tavricccc',
+		url: 'https://github.com/tavricccc/NNKIEH-SRP',
 		description: 'Project repository for NNKIEH-SRP.',
 		tags: ['GitHub', 'Repository'],
 		status: 'active',
@@ -31,8 +31,8 @@ export const links: ProjectLink[] = [
 	{
 		name: 'Hynan',
 		kind: 'project',
-		github: 'ying0930',
-		url: 'https://github.com/ying0930/Hynan',
+		github: 'tavricccc',
+		url: 'https://github.com/tavricccc/Hynan',
 		description: 'Project repository for Hynan.',
 		tags: ['GitHub', 'Repository'],
 		status: 'active',
@@ -40,8 +40,8 @@ export const links: ProjectLink[] = [
 	{
 		name: 'lexiro',
 		kind: 'project',
-		github: 'ying0930',
-		url: 'https://github.com/ying0930/lexiro',
+		github: 'tavricccc',
+		url: 'https://github.com/tavricccc/lexiro',
 		description: 'Project repository for lexiro.',
 		tags: ['GitHub', 'Repository'],
 		status: 'active',
@@ -49,8 +49,8 @@ export const links: ProjectLink[] = [
 	{
 		name: 'Wordat',
 		kind: 'project',
-		github: 'ying0930',
-		url: 'https://github.com/ying0930/Wordat',
+		github: 'tavricccc',
+		url: 'https://github.com/tavricccc/Wordat',
 		description: 'Project repository for Wordat.',
 		tags: ['GitHub', 'Repository'],
 		status: 'active',

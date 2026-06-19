@@ -2,7 +2,7 @@
 
 An Astro + Tailwind CSS personal site. Content is managed in Notion, synced by GitHub Actions, built as static Astro pages, and deployed to Cloudflare Pages with Wrangler Direct Upload.
 
-[![GitHub Repository](https://img.shields.io/badge/GitHub-ying0930%2Ftavrics-111827?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ying0930/tavrics)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-tavricccc%2Ftavricccc.github.io-111827?style=for-the-badge&logo=github&logoColor=white)](https://github.com/tavricccc/tavricccc.github.io)
 
 > Traditional Chinese docs: [docs/README.zh-TW.md](./docs/README.zh-TW.md)
 >

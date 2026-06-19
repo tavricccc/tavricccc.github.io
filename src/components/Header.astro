@@ -9,7 +9,7 @@ interface Props {
 }
 
 const BASE = import.meta.env.BASE_URL;
-const BLOG_REPO_URL = 'https://github.com/ying0930/tavrics';
+const BLOG_REPO_URL = 'https://github.com/tavricccc/tavricccc.github.io';
 const NAV_LINKS = getNavLinks(BASE);
 const { showTocButton = false } = Astro.props as Props;
 ---
@@ -60,7 +60,7 @@ const { showTocButton = false } = Astro.props as Props;
 		<div class="flex items-center gap-2">
 			<a href={BLOG_REPO_URL} target="_blank" rel="noreferrer" aria-label="Tavric Blog Repository">
 				<img
-					src="https://img.danarnoux.com/misc/DanArnoux.webp"
+					src={`${BASE}image/tavricccc.jpg`}
 					alt="Tavric avatar"
 					class="h-9 w-9 rounded-full border border-zinc-200/80 object-cover shadow-[0_6px_18px_rgba(15,23,42,0.08)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:border-zinc-300 hover:shadow-[0_10px_22px_rgba(15,23,42,0.12)] active:scale-95 dark:border-zinc-700/80 dark:shadow-[0_8px_18px_rgba(0,0,0,0.18)] dark:hover:border-zinc-500"
 				/>
