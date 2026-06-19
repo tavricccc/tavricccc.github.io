@@ -55,7 +55,7 @@ const currentView = 'archive';
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={`Blog Archive | ${SITE_TITLE} - All Posts by Year & Month`} description="Browse all blog posts organized by year and month. Explore the complete archive of articles, tutorials, and technical notes." />
+		<BaseHead title={`Articles Archive | ${SITE_TITLE} - All Posts by Year & Month`} description="Browse all articles organized by year and month. Explore the complete archive of articles, tutorials, and technical notes." />
 	</head>
 	<body>
 		<MeteorShower density={0.4} heightVh={40} />
@@ -63,13 +63,13 @@ const currentView = 'archive';
 		<MobileDrawer />
 		<main class="page-shell page-fade-in py-10 md:py-14" transition:name="page-main" transition:animate="fade">
 			<section class="mx-auto max-w-4xl">
-				<PageHeading eyebrow="Writing" title="Blog" subtitle="Browse all posts organized by year and month.">
+				<PageHeading eyebrow="Writing" title="Articles" subtitle="Browse all posts organized by year and month.">
 					<!-- Segmented Control with 3 options -->
 					<div
 						slot="actions"
 						class="view-toggle inline-flex items-center rounded-2xl border border-zinc-200/80 bg-white/75 p-1 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-md dark:border-zinc-700/80 dark:bg-zinc-900/70"
 						role="tablist"
-						aria-label="Blog view switch"
+						aria-label="Articles view switch"
 					>
 						<a
 							href={importantUrl}

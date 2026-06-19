@@ -7,6 +7,8 @@
 @layer base {
 	:root {
 		color-scheme: light;
+		--vp-font-family-base: "HarmonyOS Sans TC", "HarmonyOS Sans SC", system-ui, sans-serif;
+		--vp-font-family-mono: "JetBrains Mono", monospace;
 	}
 
 	html.dark {
@@ -938,7 +940,7 @@ html.dark:hover::-webkit-scrollbar-thumb {
 	}
 
 	.code-lang-label {
-		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+		font-family: var(--vp-font-family-mono);
 		font-size: 0.75rem;
 		padding: 0.2rem 0.5rem;
 		border-radius: 9999px;
@@ -1460,7 +1462,7 @@ html.dark .field-input:focus {
 
 .markdown-prose,
 article {
-	font-family: "Alibaba PuHuiTi", Inter, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+	font-family: var(--vp-font-family-base) !important;
 }
 
 .markdown-prose :where(p, li, blockquote, table, span, h1, h2, h3, h4),
@@ -1470,7 +1472,7 @@ article :where(p, li, blockquote, table, span, h1, h2, h3, h4) {
 
 .markdown-prose :where(code, pre),
 article :where(code, pre) {
-	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+	font-family: var(--vp-font-family-mono) !important;
 }
 
 /* ================================

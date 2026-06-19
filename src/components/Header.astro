@@ -9,7 +9,7 @@ interface Props {
 }
 
 const BASE = import.meta.env.BASE_URL;
-const BLOG_REPO_URL = 'https://github.com/Dancncn/DansBlog';
+const BLOG_REPO_URL = 'https://github.com/ying0930/tavrics';
 const NAV_LINKS = getNavLinks(BASE);
 const { showTocButton = false } = Astro.props as Props;
 ---
@@ -49,7 +49,7 @@ const { showTocButton = false } = Astro.props as Props;
 			<a href={`${BASE}`} class="group hidden no-underline md:inline" aria-label={SITE_TITLE}>
 				<span class="brand-wordmark inline-flex items-center gap-1.5 rounded-full border border-zinc-200/75 bg-white/70 px-3 py-1.5 text-zinc-800 shadow-[0_8px_20px_rgba(15,23,42,0.04)] backdrop-blur-md transition-all duration-200 group-hover:border-zinc-300/95 group-hover:bg-white/92 group-hover:text-zinc-950 dark:border-zinc-700/75 dark:bg-zinc-900/68 dark:text-zinc-100 dark:shadow-[0_8px_18px_rgba(0,0,0,0.16)] dark:group-hover:border-zinc-500/95 dark:group-hover:bg-zinc-800/92">
 					<BrandMark class="h-[1.2em] -ml-0.5" />
-					<span class="text-[1.06rem] leading-none">Dan<span class="brand-apostrophe">&rsquo;</span>s</span>
+					<span class="text-[1.06rem] leading-none">Tavric<span class="brand-apostrophe">&rsquo;</span>s</span>
 					<span class="text-[1.06rem] italic leading-none text-zinc-500 transition-colors duration-200 group-hover:text-zinc-700 dark:text-zinc-400 dark:group-hover:text-zinc-200">Blog</span>
 				</span>
 			</a>
@@ -58,10 +58,10 @@ const { showTocButton = false } = Astro.props as Props;
 			</div>
 		</div>
 		<div class="flex items-center gap-2">
-			<a href={BLOG_REPO_URL} target="_blank" rel="noreferrer" aria-label="DanArnoux Blog Repository">
+			<a href={BLOG_REPO_URL} target="_blank" rel="noreferrer" aria-label="Tavric Blog Repository">
 				<img
 					src="https://img.danarnoux.com/misc/DanArnoux.webp"
-					alt="Dan Arnoux avatar"
+					alt="Tavric avatar"
 					class="h-9 w-9 rounded-full border border-zinc-200/80 object-cover shadow-[0_6px_18px_rgba(15,23,42,0.08)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:border-zinc-300 hover:shadow-[0_10px_22px_rgba(15,23,42,0.12)] active:scale-95 dark:border-zinc-700/80 dark:shadow-[0_8px_18px_rgba(0,0,0,0.18)] dark:hover:border-zinc-500"
 				/>
 			</a>

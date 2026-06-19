@@ -1,9 +1,10 @@
 ---
 /*
- * One-stroke signature "D" — the site's brand mark.
- * A single continuous path (down-stroke, return loop, belly, S-curve flourish)
+ * One-stroke signature "T" — the site's brand mark.
+ * A single continuous path (crossbar, central sweep, and S-curve flourish)
  * drawn on with a stroke-dash animation at load and replayed on hover.
- * Designed iteratively at 120x100; path length ≈ 321.4 (see brand-draw keyframes).
+ * Designed iteratively at 120x100; the dash length is intentionally a little
+ * generous so the full mark draws cleanly as the path evolves.
  */
 interface Props {
 	class?: string;
@@ -32,6 +33,6 @@ const { class: className } = Astro.props as Props;
 	</defs>
 	<path
 		class="brand-mark-path"
-		d="M 40 12 C 33 32, 31 56, 33 74 C 34 80, 39 81.5, 41.5 76 C 46 57, 46 32, 44 16 C 43.5 11, 48 9, 54 11.5 C 76 19, 90 42, 81 63 C 74 77, 58 83, 47 79 C 52 82, 62 84, 74 80 C 88 75, 100 74, 110 70"
+		d="M 14 36 C 30 18, 60 14, 88 20 C 101 23, 109 30, 112 39 C 92 30, 65 29, 38 33 C 25 35, 18 40, 20 45 C 24 54, 45 40, 64 23 C 58 42, 52 63, 49 78 C 48 85, 54 89, 61 81 C 69 71, 73 59, 82 50 C 90 42, 100 42, 109 48"
 		stroke="url(#brand-mark-gold)"></path>
 </svg>
