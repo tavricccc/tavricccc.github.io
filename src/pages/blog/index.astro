@@ -9,6 +9,7 @@ import PageHeading from '../../components/PageHeading.astro';
 import Pagination from '../../components/Pagination.astro';
 import PostCard from '../../components/PostCard.astro';
 import { SITE_TITLE } from '../../consts';
+import { isPublishedPost } from '../../utils/content';
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -18,7 +19,7 @@ const isImportant = pathname.endsWith('/important') || pathname === `${BASE}blog
 const isArchive = pathname.endsWith('/archive') || pathname === `${BASE}blog/archive`;
 
 // Get all posts
-const allPosts = await getCollection('blog');
+const allPosts = (await getCollection('blog')).filter(isPublishedPost);
 const posts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 // Filter important posts (where important === true), sorted by importantOrder

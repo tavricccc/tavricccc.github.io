@@ -20,7 +20,6 @@ const blog = defineCollection({
 			lang: z.enum(['cn', 'en']).optional(),
 			group: z.string().optional(),
 			author: z.string().optional(),
-			category: z.string().optional(),
 			slug: z.string().optional(),
 			draft: z.boolean().default(false),
 			// For Typora image path compatibility

@@ -9,11 +9,12 @@ import MobileDrawer from '../../components/MobileDrawer.astro';
 import PageHeading from '../../components/PageHeading.astro';
 import PostCard from '../../components/PostCard.astro';
 import { SITE_TITLE } from '../../consts';
+import { isPublishedPost } from '../../utils/content';
 
 const BASE = import.meta.env.BASE_URL;
 
 // Get all posts
-const allPosts = await getCollection('blog');
+const allPosts = (await getCollection('blog')).filter(isPublishedPost);
 
 // Filter important posts (where important === true), sorted by importantOrder
 const importantPosts = allPosts

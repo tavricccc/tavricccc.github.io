@@ -3,6 +3,10 @@ dist/
 # generated types
 .astro/
 
+# generated Notion content
+src/content/blog/notion/
+public/notion/
+
 # dependencies
 node_modules/
 

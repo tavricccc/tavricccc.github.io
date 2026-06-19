@@ -7,10 +7,11 @@ import MeteorShower from '../../components/MeteorShower.astro';
 import MobileDrawer from '../../components/MobileDrawer.astro';
 import PageHeading from '../../components/PageHeading.astro';
 import { SITE_TITLE } from '../../consts';
+import { isPublishedPost } from '../../utils/content';
 import { getTagSlug, normalizeTagLabel } from '../../utils/tags';
 
 const BASE = import.meta.env.BASE_URL;
-const posts = await getCollection('blog');
+const posts = (await getCollection('blog')).filter(isPublishedPost);
 
 const tagCount = new Map<string, { label: string; count: number }>();
 for (const post of posts) {

@@ -9,6 +9,7 @@ import PageHeading from '../../../components/PageHeading.astro';
 import Pagination from '../../../components/Pagination.astro';
 import PostCard from '../../../components/PostCard.astro';
 import { SITE_TITLE } from '../../../consts';
+import { isPublishedPost } from '../../../utils/content';
 
 const BASE_DESCRIPTION = 'Browse all articles on this blog. Find technical tutorials, engineering guides, research notes, and programming tips.';
 
@@ -17,9 +18,9 @@ const BASE = import.meta.env.BASE_URL;
 export async function getStaticPaths({ paginate }) {
 	// Keep page size colocated with route generation so pagination stays deterministic at build time.
 	const PAGE_SIZE = 6;
-	const posts = (await getCollection('blog')).sort(
-		(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-	);
+	const posts = (await getCollection('blog'))
+		.filter(isPublishedPost)
+		.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 	// Page 1 is intentionally handled by /blog/ to avoid duplicate first-page routes.
 	return paginate(posts, { pageSize: PAGE_SIZE }).filter(
