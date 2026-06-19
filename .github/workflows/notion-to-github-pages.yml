@@ -1,19 +1,20 @@
-name: Sync Notion and Deploy to Cloudflare Pages
+name: Sync Notion and Deploy to GitHub Pages
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - develop
       - main
   schedule:
     - cron: "10 2 * * *"
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: notion-cloudflare-pages-${{ github.ref_name }}
+  group: notion-github-pages-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -41,11 +42,13 @@ jobs:
       - name: Build with Astro
         run: npm run build
         env:
-          CF_PAGES: "1"
+          DEPLOY_TARGET: "github-pages"
 
-      - name: Deploy to Cloudflare Pages
-        run: npx --yes wrangler pages deploy dist --project-name "$CLOUDFLARE_PAGES_PROJECT_NAME" --branch "${GITHUB_REF_NAME:-main}"
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_PAGES_PROJECT_NAME: ${{ secrets.CLOUDFLARE_PAGES_PROJECT_NAME }}
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
