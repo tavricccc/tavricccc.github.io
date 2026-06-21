@@ -127,7 +127,7 @@ export default defineConfig({
 		sitemap({
 			filter: (page) => {
 				const pathname = new URL(page).pathname;
-				if (pathname === '/important/') {
+				if (pathname === '/admin/' || pathname === '/important/') {
 					return false;
 				}
 				return !/^\/blog\/page\/\d+\/$/.test(pathname);

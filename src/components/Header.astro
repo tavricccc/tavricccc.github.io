@@ -3,8 +3,17 @@ import { GITHUB_URL, SITE_TITLE } from '../consts';
 import { getNavLinks } from '../data/navLinks';
 import BrandMark from './BrandMark.astro';
 import HeaderLink from './HeaderLink.astro';
+import LoginModal from './LoginModal.astro';
+import SettingsModal from './SettingsModal.astro';
 
+/*
+ * Global site header:
+ * - provides primary navigation on desktop
+ * - exposes mobile trigger hooks for navigation/TOC drawers
+ * - owns theme toggle and social identity actions
+ */
 interface Props {
+	// Enables TOC trigger only for pages that actually provide headings.
 	showTocButton?: boolean;
 }
 
@@ -17,6 +26,7 @@ const { showTocButton = false } = Astro.props as Props;
 <header class="site-header sticky top-0 z-50 border-b border-zinc-200/70 bg-zinc-50/72 backdrop-blur-xl transition-colors duration-200 dark:border-zinc-800/80 dark:bg-zinc-950/72">
 	<nav class="page-shell flex h-16 items-center justify-between gap-4">
 		<div class="flex items-center gap-6">
+			<!-- Stable trigger ID consumed by MobileDrawer script. -->
 			<button
 				type="button"
 				id="mobile-menu-button"
@@ -29,6 +39,7 @@ const { showTocButton = false } = Astro.props as Props;
 				</svg>
 				<span>Menu</span>
 			</button>
+			<!-- TOC drawer binds to this trigger and only renders on mobile. -->
 			{
 				showTocButton && (
 					<button
@@ -54,10 +65,66 @@ const { showTocButton = false } = Astro.props as Props;
 				</span>
 			</a>
 			<div class="hidden items-center gap-1 text-sm md:flex">
-				{NAV_LINKS.map((link) => <HeaderLink href={link.href}>{link.label}</HeaderLink>)}
+				{
+					NAV_LINKS.map((link) => (
+						<HeaderLink href={link.href}>{link.label}</HeaderLink>
+					))
+				}
 			</div>
 		</div>
 		<div class="flex items-center gap-2">
+			<!-- RSS Dropdown -->
+			<div class="relative" id="rss-dropdown">
+				<button
+					type="button"
+					id="rss-button"
+					class="header-toolbar-icon icon-button inline-flex items-center justify-center"
+					aria-label="RSS Feed"
+					aria-expanded="false"
+					aria-haspopup="true"
+				>
+					<svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true">
+						<path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z" />
+					</svg>
+				</button>
+				<div
+					id="rss-menu"
+					class="absolute right-0 top-full z-50 mt-2 hidden w-36 rounded-xl border border-zinc-200/80 bg-white/92 py-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.14)] dark:border-zinc-700/80 dark:bg-zinc-900/92"
+					role="menu"
+				>
+					<a
+						href={`${BASE}rss.xml`}
+						class="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100/90 dark:text-zinc-300 dark:hover:bg-zinc-800"
+						role="menuitem"
+					>
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+							<path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z" />
+						</svg>
+						All Posts
+					</a>
+					<a
+						href={`${BASE}rss-zh.xml`}
+						class="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100/90 dark:text-zinc-300 dark:hover:bg-zinc-800"
+						role="menuitem"
+					>
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+							<path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z" />
+						</svg>
+						中文
+					</a>
+					<a
+						href={`${BASE}rss-en.xml`}
+						class="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100/90 dark:text-zinc-300 dark:hover:bg-zinc-800"
+						role="menuitem"
+					>
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+							<path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z" />
+						</svg>
+						English
+					</a>
+				</div>
+			</div>
+
 			<a href={BLOG_REPO_URL} target="_blank" rel="noreferrer" aria-label="Tavric Blog Repository">
 				<img
 					src={`${BASE}image/tavricccc.jpg`}
@@ -66,37 +133,135 @@ const { showTocButton = false } = Astro.props as Props;
 				/>
 			</a>
 			<div class="header-toolbar-group hidden md:inline-flex">
-				<a href={GITHUB_URL} target="_blank" rel="noreferrer" class="header-toolbar-icon icon-button inline-flex items-center justify-center" aria-label="GitHub">
+				<a
+					href={GITHUB_URL}
+					target="_blank"
+					rel="noreferrer"
+					class="header-toolbar-icon icon-button inline-flex items-center justify-center"
+					aria-label="GitHub"
+				>
 					<svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true">
 						<path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.523 2 12 2z" />
 					</svg>
 					<span class="sr-only">GitHub</span>
 				</a>
 
-				<button type="button" id="theme-toggle" class="header-toolbar-icon icon-button inline-flex items-center justify-center" aria-label="Toggle theme">
+				<button
+					type="button"
+					id="theme-toggle"
+					class="header-toolbar-icon icon-button inline-flex items-center justify-center"
+					aria-label="Toggle theme"
+				>
 					<svg data-theme-icon="sun" viewBox="0 0 24 24" class="h-5 w-5 fill-current transition-transform duration-300" aria-hidden="true">
 						<path d="M12 4a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 13a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm8-5a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM7 12a1 1 0 0 1-1 1H5a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm9.7-5.3a1 1 0 0 1 0 1.4L16 8.8a1 1 0 1 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0Zm-7.3 7.3a1 1 0 0 1 0 1.4l-.7.7a1 1 0 0 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0Zm7.3 2.1a1 1 0 0 1-1.4 1.4l-.7-.7a1 1 0 0 1 1.4-1.4l.7.7ZM9.4 8.8A1 1 0 0 1 8 8.8l-.7-.7a1 1 0 1 1 1.4-1.4l.7.7a1 1 0 0 1 0 1.4ZM12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z" />
 					</svg>
 					<span class="sr-only">Toggle theme</span>
 				</button>
+
+				<!-- Login button (shown when not logged in) -->
+				<button type="button" id="auth-button" class="header-toolbar-button hidden h-9 items-center justify-center px-3 text-sm font-medium" data-auth-login>
+					Login
+				</button>
 			</div>
 
-			<a href={GITHUB_URL} target="_blank" rel="noreferrer" class="header-toolbar-icon icon-button inline-flex items-center justify-center md:hidden" aria-label="GitHub">
+			<a
+				href={GITHUB_URL}
+				target="_blank"
+				rel="noreferrer"
+				class="header-toolbar-icon icon-button inline-flex items-center justify-center md:hidden"
+				aria-label="GitHub"
+			>
 				<svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true">
 					<path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.523 2 12 2z" />
 				</svg>
 				<span class="sr-only">GitHub</span>
 			</a>
 
-			<button type="button" id="theme-toggle-mobile" class="header-toolbar-icon icon-button inline-flex items-center justify-center md:hidden" aria-label="Toggle theme">
+			<button
+				type="button"
+				id="theme-toggle-mobile"
+				class="header-toolbar-icon icon-button inline-flex items-center justify-center md:hidden"
+				aria-label="Toggle theme"
+			>
 				<svg data-theme-icon="sun" viewBox="0 0 24 24" class="h-5 w-5 fill-current transition-transform duration-300" aria-hidden="true">
 					<path d="M12 4a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 13a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm8-5a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM7 12a1 1 0 0 1-1 1H5a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm9.7-5.3a1 1 0 0 1 0 1.4L16 8.8a1 1 0 1 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0Zm-7.3 7.3a1 1 0 0 1 0 1.4l-.7.7a1 1 0 0 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0Zm7.3 2.1a1 1 0 0 1-1.4 1.4l-.7-.7a1 1 0 0 1 1.4-1.4l.7.7ZM9.4 8.8A1 1 0 0 1 8 8.8l-.7-.7a1 1 0 1 1 1.4-1.4l.7.7a1 1 0 0 1 0 1.4ZM12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z" />
 				</svg>
 				<span class="sr-only">Toggle theme</span>
 			</button>
+
+			<!-- User dropdown (shown when logged in) -->
+			<div id="user-dropdown" class="relative hidden" data-auth-user>
+				<button
+					type="button"
+					id="user-dropdown-button"
+					class="flex items-center gap-2 rounded-full border border-zinc-200/85 bg-white/82 p-0.5 shadow-[0_8px_22px_rgba(15,23,42,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 hover:bg-white/95 hover:shadow-[0_12px_26px_rgba(15,23,42,0.12)] dark:border-zinc-700/85 dark:bg-zinc-900/80 dark:shadow-[0_8px_18px_rgba(0,0,0,0.18)] dark:hover:border-zinc-500 dark:hover:bg-zinc-800/95"
+					aria-expanded="false"
+					aria-haspopup="true"
+				>
+					<img
+						id="user-avatar"
+						src="/image/tavricccc.jpg"
+						alt="User avatar"
+						class="h-8 w-8 rounded-full object-cover"
+					/>
+				</button>
+				<div
+					id="user-dropdown-menu"
+					class="absolute right-0 mt-2 w-56 rounded-2xl border border-zinc-200/80 bg-white/92 py-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.14)] opacity-0 invisible transition-all duration-200 dark:border-zinc-700/80 dark:bg-zinc-900/92"
+					role="menu"
+				>
+					<!-- Header: avatar + username + subtitle -->
+					<div class="border-b border-zinc-200/80 px-3 py-3 dark:border-zinc-700/80">
+						<div class="flex items-center gap-3">
+							<img
+								id="dropdown-user-avatar"
+								src="/image/tavricccc.jpg"
+								alt="User avatar"
+								class="h-10 w-10 rounded-full object-cover"
+							/>
+							<div class="min-w-0">
+								<p id="user-name" class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">User</p>
+								<p class="text-xs text-zinc-500 dark:text-zinc-400">Manage your account</p>
+							</div>
+						</div>
+					</div>
+					<!-- Settings button -->
+					<button
+						type="button"
+						id="settings-button"
+						class="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-zinc-700 transition-colors hover:bg-zinc-100/90 dark:text-zinc-300 dark:hover:bg-zinc-800"
+						role="menuitem"
+					>
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+							<path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+							<path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+						</svg>
+						Settings
+					</button>
+					<!-- Footer: Logout -->
+					<div class="mt-1 border-t border-zinc-200/80 pb-1 pt-1 dark:border-zinc-700/80">
+						<button
+							type="button"
+							id="logout-button"
+							class="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-red-600 transition-colors hover:bg-zinc-100/90 dark:text-red-400 dark:hover:bg-zinc-800"
+							role="menuitem"
+						>
+							<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+								<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+								<polyline points="16,17 21,12 16,7" />
+								<line x1="21" y1="12" x2="9" y2="12" />
+							</svg>
+							Logout
+						</button>
+					</div>
+				</div>
+			</div>
 		</div>
 	</nav>
 </header>
+
+<LoginModal />
+<SettingsModal />
 
 <style is:global>
 	.header-toolbar-group {
@@ -170,6 +335,172 @@ const { showTocButton = false } = Astro.props as Props;
 </style>
 
 <script is:inline>
+	const initAuthButton = async () => {
+		const { storeTokenFromHash, getCurrentUser, getAuthToken, logout } = window.__auth || {};
+		if (!storeTokenFromHash || !getCurrentUser || !getAuthToken || !logout) {
+			setTimeout(initAuthButton, 100);
+			return;
+		}
+
+		const loginButton = document.getElementById('auth-button');
+		const userDropdown = document.getElementById('user-dropdown');
+		const userAvatar = document.getElementById('user-avatar');
+		const userName = document.getElementById('user-name');
+		const userDropdownButton = document.getElementById('user-dropdown-button');
+		const userDropdownMenu = document.getElementById('user-dropdown-menu');
+		const logoutButton = document.getElementById('logout-button');
+		const modal = document.getElementById('login-modal');
+		const modalClose = document.getElementById('login-modal-close');
+		const dropdownAvatar = document.getElementById('dropdown-user-avatar');
+		const settingsButton = document.getElementById('settings-button');
+		const fallbackAvatar = '/image/tavricccc.jpg';
+
+		if (!loginButton || !userDropdown || !userDropdownButton || !userDropdownMenu || !logoutButton || !settingsButton) {
+			return;
+		}
+
+		const openModal = () => {
+			if (!modal) return;
+			requestAnimationFrame(() => {
+				modal.classList.remove('opacity-0', 'invisible');
+				modal.classList.add('opacity-100');
+				const content = modal.querySelector('.modal-content');
+				if (content) {
+					content.classList.remove('scale-95', 'opacity-0');
+					content.classList.add('scale-100', 'opacity-100');
+				}
+				modal.setAttribute('aria-hidden', 'false');
+			});
+		};
+
+		const closeModal = () => {
+			if (!modal) return;
+			modal.classList.remove('opacity-100');
+			modal.classList.add('opacity-0');
+			const content = modal.querySelector('.modal-content');
+			if (content) {
+				content.classList.remove('scale-100', 'opacity-100');
+				content.classList.add('scale-95', 'opacity-0');
+			}
+			setTimeout(() => modal.classList.add('invisible'), 200);
+			modal.setAttribute('aria-hidden', 'true');
+		};
+
+		const toggleDropdown = () => {
+			if (!userDropdownButton || !userDropdownMenu) return;
+			const isExpanded = userDropdownButton.getAttribute('aria-expanded') === 'true';
+			userDropdownButton.setAttribute('aria-expanded', String(!isExpanded));
+			if (isExpanded) {
+				userDropdownMenu.classList.add('opacity-0', 'invisible');
+				userDropdownMenu.classList.remove('opacity-100', 'visible');
+			} else {
+				userDropdownMenu.classList.remove('opacity-0', 'invisible');
+				userDropdownMenu.classList.add('opacity-100', 'visible');
+			}
+		};
+
+		const closeDropdown = () => {
+			if (!userDropdownButton || !userDropdownMenu) return;
+			userDropdownButton.setAttribute('aria-expanded', 'false');
+			userDropdownMenu.classList.add('opacity-0', 'invisible');
+			userDropdownMenu.classList.remove('opacity-100', 'visible');
+		};
+
+		const applyUserToUi = (user) => {
+			const nextAvatar = user?.avatar || fallbackAvatar;
+			const nextName = user?.username || 'User';
+			if (userAvatar) userAvatar.src = nextAvatar;
+			if (userName) userName.textContent = nextName;
+			if (dropdownAvatar) dropdownAvatar.src = nextAvatar;
+		};
+
+		const showLoginButton = () => {
+			loginButton.classList.remove('hidden');
+			loginButton.classList.add('inline-flex');
+			userDropdown.classList.add('hidden');
+			userDropdown.style.display = '';
+			closeDropdown();
+		};
+
+		const showUserDropdown = () => {
+			loginButton.classList.add('hidden');
+			loginButton.classList.remove('inline-flex');
+			userDropdown.classList.remove('hidden');
+			userDropdown.style.display = 'block';
+		};
+
+		if (userDropdown.dataset.authBound !== 'true') {
+			userDropdown.dataset.authBound = 'true';
+
+			window.addEventListener('blog:user-updated', (event) => {
+				const detail = event.detail ?? {};
+				applyUserToUi({
+					avatar: detail.avatarUrl,
+					username: detail.username,
+				});
+			});
+
+			userDropdownButton.addEventListener('click', (e) => {
+				e.stopPropagation();
+				toggleDropdown();
+			});
+
+			logoutButton.addEventListener('click', async () => {
+				closeDropdown();
+				await logout();
+				window.location.reload();
+			});
+
+			settingsButton.addEventListener('click', () => {
+				closeDropdown();
+				document.getElementById('settings-modal')?.dispatchEvent(new CustomEvent('open-settings'));
+			});
+
+			document.addEventListener('click', (e) => {
+				if (userDropdown && !userDropdown.contains(e.target)) closeDropdown();
+			});
+		}
+
+		modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+		modalClose?.addEventListener('click', closeModal);
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && modal && !modal.classList.contains('invisible')) closeModal();
+		});
+
+		try {
+			storeTokenFromHash();
+			const hasToken = Boolean(getAuthToken());
+
+			if (hasToken) {
+				showUserDropdown();
+				applyUserToUi({
+					avatar: userAvatar?.src || fallbackAvatar,
+					username: userName?.textContent || 'User',
+				});
+			}
+
+			const user = await getCurrentUser();
+
+			if (user) {
+				showUserDropdown();
+				applyUserToUi(user);
+			} else {
+				showLoginButton();
+			}
+		} catch (error) {
+			console.error('Auth error:', error);
+			showLoginButton();
+		}
+
+		if (loginButton.dataset.authBound !== 'true') {
+			loginButton.dataset.authBound = 'true';
+			loginButton.addEventListener('click', openModal);
+		}
+	};
+
+	initAuthButton();
+	document.addEventListener('astro:page-load', initAuthButton);
+
 	const initThemeToggle = () => {
 		const buttons = Array.from(document.querySelectorAll('[id="theme-toggle"], [id="theme-toggle-mobile"]'));
 		if (!buttons.length) return;
@@ -184,7 +515,9 @@ const { showTocButton = false } = Astro.props as Props;
 				: (systemPrefersDark ? 'dark' : 'light');
 			root.classList.toggle('dark', theme === 'dark');
 			root.dataset.theme = theme;
+			// Route swaps restore the static head, so re-sync the browser chrome color.
 			if (typeof window.__syncThemeColor === 'function') window.__syncThemeColor(theme === 'dark');
+			return theme === 'dark';
 		};
 
 		const updateAria = () => {
@@ -192,7 +525,9 @@ const { showTocButton = false } = Astro.props as Props;
 			buttons.forEach((button) => {
 				button.setAttribute('aria-pressed', String(isDark));
 				const icon = button.querySelector('[data-theme-icon]');
-				if (icon) icon.classList.toggle('rotate-180', isDark);
+				if (icon) {
+					icon.classList.toggle('rotate-180', isDark);
+				}
 			});
 		};
 
@@ -214,6 +549,7 @@ const { showTocButton = false } = Astro.props as Props;
 					return;
 				}
 
+				// Expand the new theme as a circle from the click point for a tactile switch feel.
 				const rect = button.getBoundingClientRect();
 				const x = event.clientX || rect.left + rect.width / 2;
 				const y = event.clientY || rect.top + rect.height / 2;
@@ -252,6 +588,57 @@ const { showTocButton = false } = Astro.props as Props;
 	};
 
 	initThemeToggle();
+	// Rebind on client-side navigation because header can be re-rendered by View Transitions.
 	document.addEventListener('astro:page-load', initThemeToggle);
 	document.addEventListener('astro:after-swap', initThemeToggle);
+
+	// RSS Dropdown
+	const initRssDropdown = () => {
+		const rssDropdown = document.getElementById('rss-dropdown');
+		const rssButton = document.getElementById('rss-button');
+		const rssMenu = document.getElementById('rss-menu');
+
+		if (!rssDropdown || !rssButton || !rssMenu) return;
+
+		// Prevent double binding
+		if (rssButton.dataset.rssBound === 'true') return;
+		rssButton.dataset.rssBound = 'true';
+
+		const toggleDropdown = (e) => {
+			e.stopPropagation();
+			const isExpanded = rssButton.getAttribute('aria-expanded') === 'true';
+			rssButton.setAttribute('aria-expanded', String(!isExpanded));
+			if (isExpanded) {
+				rssMenu.classList.add('hidden');
+			} else {
+				rssMenu.classList.remove('hidden');
+			}
+		};
+
+		const closeDropdown = () => {
+			rssButton.setAttribute('aria-expanded', 'false');
+			rssMenu.classList.add('hidden');
+		};
+
+		// Click to toggle on all devices (mobile-friendly)
+		rssButton.addEventListener('click', toggleDropdown);
+
+		// Close when clicking outside
+		document.addEventListener('click', (e) => {
+			if (!rssDropdown.contains(e.target)) {
+				closeDropdown();
+			}
+		});
+
+		// Close on Escape
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && !rssMenu.classList.contains('hidden')) {
+				closeDropdown();
+			}
+		});
+	};
+
+	initRssDropdown();
+	document.addEventListener('astro:page-load', initRssDropdown);
+	document.addEventListener('astro:after-swap', initRssDropdown);
 </script>
