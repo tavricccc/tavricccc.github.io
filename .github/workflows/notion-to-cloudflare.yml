@@ -49,3 +49,10 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_PAGES_PROJECT_NAME: ${{ secrets.CLOUDFLARE_PAGES_PROJECT_NAME }}
+
+      - name: Notify IndexNow
+        run: npm run indexnow:sitemap
+        env:
+          INDEXNOW_KEY: d95e0c5cf5e744158f1f516a7f5a9f24
+          INDEXNOW_HOST: tavricccc.github.io
+

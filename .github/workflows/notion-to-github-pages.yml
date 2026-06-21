@@ -52,3 +52,10 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Notify IndexNow
+        run: npm run indexnow:sitemap
+        env:
+          INDEXNOW_KEY: d95e0c5cf5e744158f1f516a7f5a9f24
+          INDEXNOW_HOST: tavricccc.github.io
+
