@@ -76,12 +76,7 @@ function remarkGitHubAlertFallback() {
 	};
 }
 
-const REPO_BASE = '/';
-const isCloudflarePages = Boolean(process.env.CF_PAGES);
-const isGitHubPages = Boolean(process.env.GITHUB_ACTIONS) || process.env.DEPLOY_TARGET === 'github-pages';
-const isProduction = process.env.NODE_ENV === 'production';
-// Cloudflare serves from "/", while GitHub Pages needs the repository subpath.
-const runtimeBase = isCloudflarePages ? '/' : isGitHubPages && isProduction ? REPO_BASE : '/';
+const runtimeBase = '/';
 const runtimeSite = 'https://tavricccc.github.io';
 
 /*

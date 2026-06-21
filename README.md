@@ -1,12 +1,10 @@
 # Tavric's Blog
 
-An Astro + Tailwind CSS personal site. Content is managed in Notion, synced by GitHub Actions, built as static Astro pages, and deployed to Cloudflare Pages with Wrangler Direct Upload.
+An Astro + Tailwind CSS personal site. Content is managed in Notion, synced by GitHub Actions, built as static Astro pages, and deployed to GitHub Pages.
 
 [![GitHub Repository](https://img.shields.io/badge/GitHub-tavricccc%2Ftavricccc.github.io-111827?style=for-the-badge&logo=github&logoColor=white)](https://github.com/tavricccc/tavricccc.github.io)
 
 > Traditional Chinese docs: [docs/README.zh-TW.md](./docs/README.zh-TW.md)
->
-> Notion + Cloudflare setup: [docs/notion-cloudflare-cms.zh-TW.md](./docs/notion-cloudflare-cms.zh-TW.md)
 
 ## Current Stack
 
@@ -15,7 +13,7 @@ An Astro + Tailwind CSS personal site. Content is managed in Notion, synced by G
 - Astro Content Collections
 - Notion as the writing CMS
 - GitHub Actions for sync/build/deploy
-- Cloudflare Pages via Wrangler Direct Upload
+- GitHub Pages
 - Node 24
 
 Removed legacy pieces: comments, login, RSS, SEO guide docs, and the old separated backend Worker integration.
@@ -60,29 +58,20 @@ npm run preview
 Workflow:
 
 ```text
-.github/workflows/notion-to-cloudflare.yml
+.github/workflows/notion-to-github-pages.yml
 ```
 
 Triggers:
 
-- push to `develop`
 - push to `main`
 - manual workflow dispatch
 - daily schedule at UTC 02:10
-
-Branch behavior:
-
-- `develop` deploys a Cloudflare Pages preview
-- `main` deploys production
 
 Required GitHub Actions secrets:
 
 ```text
 NOTION_TOKEN
 NOTION_PARENT_PAGE_ID
-CLOUDFLARE_ACCOUNT_ID
-CLOUDFLARE_API_TOKEN
-CLOUDFLARE_PAGES_PROJECT_NAME
 ```
 
 ## Routes
@@ -105,7 +94,7 @@ The `/blog/` route is presented as Articles in the UI.
 
 ```text
 .
-├─ .github/workflows/notion-to-cloudflare.yml
+├─ .github/workflows/notion-to-github-pages.yml
 ├─ docs/
 ├─ public/
 ├─ scripts/sync-notion.mjs
