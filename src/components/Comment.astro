@@ -315,7 +315,7 @@ const { postSlug } = Astro.props;
 					document.getElementById('reply-to-indicator')?.classList.add('hidden');
 					loadComments(postSlug);
 					if (result.status === 'pending') {
-						alert('Your comment is awaiting review and will appear once approved. / 评论已提交，待博主审核通过后显示。');
+						alert('Your comment is awaiting review and will appear once approved. / 評論已提交，待博主審核通過後顯示。');
 					}
 				} else {
 					alert(result.error || 'Failed to submit comment.');
