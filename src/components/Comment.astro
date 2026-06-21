@@ -129,7 +129,7 @@ const { postSlug } = Astro.props;
 
 	const renderComment = (comment: CommentData, isReply = false): string => {
 		const userName = escapeHtml(comment.user?.name || comment.user?.login || 'Anonymous');
-		const avatarUrl = escapeHtml(comment.user?.avatarUrl || 'https://img.danarnoux.com/misc/DanArnoux.webp');
+		const avatarUrl = escapeHtml(comment.user?.avatarUrl || '/image/tavricccc.jpg');
 		const commentId = escapeHtml(comment.id);
 		const commentBody = escapeHtml(comment.content || comment.body || '');
 		const replyCount = comment.replies?.length || 0;
