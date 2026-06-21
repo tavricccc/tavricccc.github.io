@@ -1,6 +1,4 @@
-const API_BASE = import.meta.env.DEV
-	? 'http://localhost:8787'
-	: 'https://api.danarnoux.com';
+import { API_BASE } from './config';
 
 export interface AdminStats {
 	total: number;
