@@ -1,5 +1,6 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import sharp from 'sharp';
 
 const NOTION_VERSION = '2022-06-28';
 const GENERATED_POST_DIR = path.join('src', 'content', 'blog', 'notion');
@@ -287,6 +288,22 @@ async function downloadAsset(url, imageContext) {
 	const filename = `${String(imageContext.count).padStart(3, '0')}.${ext}`;
 	const outputPath = path.join(imageContext.imageDir, filename);
 	const bytes = Buffer.from(await response.arrayBuffer());
+
+	const compressableExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+	if (compressableExtensions.includes(ext.toLowerCase())) {
+		try {
+			const webpFilename = `${String(imageContext.count).padStart(3, '0')}.webp`;
+			const webpOutputPath = path.join(imageContext.imageDir, webpFilename);
+			await sharp(bytes)
+				.resize({ width: 1200, withoutEnlargement: true })
+				.webp({ quality: 80 })
+				.toFile(webpOutputPath);
+			
+			return `/notion/images/${imageContext.slug}/${webpFilename}`;
+		} catch (err) {
+			console.error(`⚠️ Image compression failed for ${url}, using original: ${err.message}`);
+		}
+	}
 
 	await writeFile(outputPath, bytes);
 	return `/notion/images/${imageContext.slug}/${filename}`;
