@@ -1,6 +1,32 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
+
+// Load .env file programmatically if it exists (for local convenience)
+if (existsSync('.env')) {
+	try {
+		const envContent = readFileSync('.env', 'utf8');
+		for (const line of envContent.split(/\r?\n/)) {
+			const trimmed = line.trim();
+			if (!trimmed || trimmed.startsWith('#')) continue;
+			const eqIdx = trimmed.indexOf('=');
+			if (eqIdx !== -1) {
+				const key = trimmed.slice(0, eqIdx).trim();
+				let val = trimmed.slice(eqIdx + 1).trim();
+				// Strip surrounding quotes if present
+				if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+					val = val.slice(1, -1);
+				}
+				if (!process.env[key]) {
+					process.env[key] = val;
+				}
+			}
+		}
+	} catch (err) {
+		console.warn('⚠️ Failed to load local .env file:', err.message);
+	}
+}
 
 const GENERATED_POST_DIR = path.join('src', 'content', 'blog', 'craft');
 const GENERATED_IMAGE_DIR = path.join('public', 'craft', 'images');
