@@ -86,7 +86,8 @@ async function cleanGeneratedContent() {
 }
 
 async function generatePost({ collectionName, item, propertyKeys }) {
-	const title = item.title || 'Untitled';
+	const titleKey = propertyKeys.name || 'title';
+	const title = item[titleKey] || item.title || 'Untitled';
 	const baseSlug = slugify(title) || 'untitled';
 	const slug = uniqueSlug(baseSlug, slugify(collectionName));
 	const postImageDir = path.join(GENERATED_IMAGE_DIR, slug);
@@ -144,7 +145,7 @@ async function getCollectionSchema(collectionId) {
 function validateCollection(schema) {
 	const properties = schema.properties || [];
 	return {
-		name: 'title',
+		name: schema.contentPropDetails?.key || 'title',
 		status: findPropertyKey(properties, ['Status', 'status']),
 		publishedDate: findPropertyKey(properties, ['Published Date', '日期', 'publishedDate']),
 		tags: findPropertyKey(properties, ['Tags', 'tags'])
