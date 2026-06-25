@@ -1,0 +1,61 @@
+name: Sync Craft and Deploy to GitHub Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "10 2 * * *"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: craft-github-pages-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  sync-build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync Craft content
+        run: npm run sync:craft
+        env:
+          CRAFT_API_URL: ${{ secrets.CRAFT_API_URL }}
+          CRAFT_API_KEY: ${{ secrets.CRAFT_API_KEY }}
+          CRAFT_PARENT_PAGE_ID: ${{ secrets.CRAFT_PARENT_PAGE_ID }}
+
+      - name: Build with Astro
+        run: npm run build
+        env:
+          DEPLOY_TARGET: "github-pages"
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Notify IndexNow
+        run: npm run indexnow:sitemap
+        env:
+          INDEXNOW_KEY: d95e0c5cf5e744158f1f516a7f5a9f24
+          INDEXNOW_HOST: tavricccc.github.io

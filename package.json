@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "sync:notion": "node scripts/sync-notion.mjs",
+    "sync:craft": "node scripts/sync-craft.mjs",
     "build": "astro build && node scripts/ensure-sitemap-xml.mjs",
     "postbuild": "node scripts/postbuild-sitemap.mjs",
     "indexnow": "node scripts/indexnow.mjs",
